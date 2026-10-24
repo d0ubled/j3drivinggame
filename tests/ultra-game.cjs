@@ -5,3 +5,14 @@ if(roadSurface(575,0,0)!==0||roadSurface(575,0,HIGHWAY_Y)!==HIGHWAY_Y)throw Erro
 reset();traffic.length=0;lotVisitors.length=0;freewayCars.splice(0,freewayCars.length,{theta:0,r:575,dir:1,cruise:30,speed:30,color:'#aabbcc'});x=575;z=0;groundY=0;advanceFreeway(.001);if(crashed)throw Error('Collision with traffic above');freewayCars[0].theta=0;groundY=HIGHWAY_Y;advanceFreeway(.001);if(!crashed)throw Error('Deck collision missing');
 crashed=false;for(let ramp of ramps){let p=ramp.points[85],next=ramp.points[86];x=p[0];z=p[1];groundY=p[2];yaw=Math.atan2(next[0]-p[0],next[1]-p[1]);thirdPerson=false;let rig=makeCameraRig();if(Math.abs(rig.height-(groundY+1.45))>.01)throw Error('Cockpit elevation');draw();thirdPerson=true;draw();if(modelLift!==0)throw Error('Car lift leaked')}
 `,env);console.log('PASS: eight freeway lanes, traffic in both directions, ramp clearance,  eight smooth graded ramps, tangent merges, continuous roads beneath four overpasses, separate road levels and collision layers, elevated cars and both camera views.');
+
+vm.runInContext(`
+const styles=new Set(),heights=new Set();
+for(let a=-300;a<340;a+=40)for(let b=-300;b<340;b+=40){styles.add(ultraBuildingStyle(a,b));heights.add(ultraBuildingHeight(a,b))}
+if(styles.size!==4||heights.size<6)throw Error('Repetitive city profiles');
+let savedCube=cube;
+cube=function(a,b,w,l,h,col,...rest){if(col==='#929a8b'&&(roadDist(a)<8+w/2||roadDist(b)<8+l/2))throw Error('Planter intrudes into street');return savedCube(a,b,w,l,h,col,...rest)};
+for(const p of [[2.2,-65],[162.3,20],[-162.3,-160]]){x=p[0];z=p[1];groundY=0;staticKey='';draw()}
+cube=savedCube;
+`,env);
+console.log('PASS: four facade families, varied skyline heights, city scene rebuilds, and planters clear of travel lanes.');
