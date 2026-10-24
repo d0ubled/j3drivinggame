@@ -21,6 +21,8 @@ for(const quality of ['low','medium','high']){
   const state={rig:{x:0,z:0,height:1.45,heading,pitch:0},width:1280,height:800,focal:491,time:1,player:{x:0,z:0,groundY:0,yaw:heading,speed:12,steering:.2,gear:1,park:false,signal:1,thirdPerson:false}};
   out.render(faces,state);
   const right=new Real.Vector3(Math.sin(heading)*10+Math.cos(heading)*3,1.45,-(Math.cos(heading)*10-Math.sin(heading)*3)).project(out.camera);
+  const instruments=out.scene.getObjectByName('cockpit-instruments').getWorldPosition(new Real.Vector3()).project(out.camera);
+  if(Math.abs(instruments.x)>1||Math.abs(instruments.y)>.95)throw Error('Cockpit instruments outside viewport');
   if(right.x<=0||Math.abs(right.y-.14)>.001)throw Error('Camera coordinate handedness/horizon');
   if(out.renderer.shadowMap.enabled!==(quality!=='low'))throw Error('Graphics setting');
  }
