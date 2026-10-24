@@ -246,3 +246,8 @@ The 70 mph speed limit remains in effect even though the player's maximum speed 
 - The single-file/no-renderer-dependency description earlier in this document now applies to Classic. Ultra uses modules and a pinned external Three.js download.
 - The full graphics direction also includes richer scenery assets and further postprocessing/performance polish. See `ultra/README.md` for shipped features and remaining work.
 - CPU-side simulation/geometry checks are required, but must not be described as real-browser visual or GPU shader verification.
+
+### Shared HUD adjustment
+
+- In both Classic and Ultra, place the third-person speed/gear information panel at the left edge beneath the objectives, leaving the car and center driving view unobstructed.
+- Preserve the cockpit information-panel placement. Shared usability fixes may now update Classic as well as Ultra when explicitly requested; the original Classic snapshot remains available in Git history.
