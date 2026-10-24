@@ -79,3 +79,7 @@ Use the same four locations for Classic/Ultra comparisons:
 Check Chrome/Edge and a touch device at low/medium/high settings. Test resizing, pause/restart, mute, signal/horn reactions, and the no-WebGL/CDN-failure fallback.
 
 Development browser launch was rejected by the environment's automatic approval policy. No screenshot or visual-playtest result is claimed for this release.
+
+## City and freeway detail update
+
+Ultra now replaces the uniform building blocks with four facade families, a taller central district, glazed storefronts, window mullions, parapets, roof pavilions and planters. Added freeway details include longitudinal bridge girders, overhead exit gantries on all four sides, median lighting, pavement expansion joints and barrier reflectors. Reflectors respect existing ramp openings; sign supports and planters stay outside travel lanes. Road geometry and Classic are unchanged.
