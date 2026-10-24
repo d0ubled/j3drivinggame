@@ -31,3 +31,13 @@ if(!env.window.__ultraDiagnostics.ready)throw Error('Renderer never initialized'
 console.log('PASS: real Three.js geometry/material/camera APIs, finite scene buffers, four camera headings, projection alignment, car models, mirror path and all graphics presets. GPU/shader execution is not covered.');
 
 
+
+for(let side=0;side<4;side++){
+ const gantry=out.scene.getObjectByName('exit-gantry-'+side);
+ if(!gantry)throw Error('Missing exit gantry');
+ for(const child of gantry.children){
+  if(child.geometry.type==='PlaneGeometry'&&child.position.y-child.geometry.parameters.height/2<5)throw Error('Low sign over freeway');
+  if(child.geometry.type==='BoxGeometry'&&child.position.y<4&&Math.abs(child.position.x)-child.scale.x/2<19)throw Error('Gantry post in freeway lanes');
+ }
+}
+console.log('PASS: four exit gantries, sign clearance above five meters, support columns outside travel lanes.');
