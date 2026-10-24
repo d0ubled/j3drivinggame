@@ -137,6 +137,8 @@ This document records the requirements and decisions established during developm
 - Paved merge aprons must be drivable across their full intended width; visual asphalt and the drivable-surface calculation must agree.
 - Leave space for the entire vehicle footprint, not just its center point.
 - Keep guardrails and barriers out of the merge path.
+- Determine freeway guardrail openings from actual entrance/exit pavement widths and elevations, including clearance at both ends of each rendered rail segment; fixed angular openings alone are insufficient.
+- Trim ramp-side rail sections where they enter the freeway, for both entrances and exits. Preserve barriers away from ramp connections.
 - Align ramp pavement, shoulders, paint, deck edges, and guardrails at the freeway connection.
 - Use a gradual merge taper to the outside freeway lane, rather than a sudden narrow connector.
 - Current entry taper covers approximately 0.13 radians (about 75 meters), with its outer edge transitioning from radius 583 to 579 meters.
