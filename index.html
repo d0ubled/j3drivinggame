@@ -46,7 +46,7 @@ function drawRamps(){for(let ramp of ramps){let n=ramp.points.length-1,travel=0,
  face([[a[0]-A.nx*width,a[2]+.035,a[1]-A.nz*width],[a[0]+A.nx*width,a[2]+.035,a[1]+A.nz*width],[b[0]+B.nx*nextWidth,b[2]+.035,b[1]+B.nz*nextWidth],[b[0]-B.nx*nextWidth,b[2]+.035,b[1]-B.nz*nextWidth]],'#414d55');
  if(!lead){strip(wide?-2.65:-2.05,wide?-2.52:-1.92,.075,'#f4f0df');strip(wide?2.52:1.92,wide?2.65:2.05,.075,'#f4f0df')}
  if(Math.min(a[2],b[2])>.6){strip(-width-.15,width+.15,-.65,'#8b9796');for(let edge of [-width,width])face([[a[0]+A.nx*edge,a[2]-.65,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]-.65,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.02,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.02,a[1]+A.nz*edge]],'#a8b3ad')}
- if(Math.max(a[2],b[2])>.35)for(let edge of [-width+.1,width-.1]){if(wide&&a[2]>HIGHWAY_Y-.4&&Math.hypot(a[0]+A.nx*edge,a[1]+A.nz*edge)<579.7)continue;strip(edge,edge+Math.sign(edge)*.12,.85,'#c2ccca');face([[a[0]+A.nx*edge,a[2]+.63,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]+.63,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.85,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.85,a[1]+A.nz*edge]],'#aebcba');if(i%4===0)cube(a[0]+A.nx*edge,a[1]+A.nz*edge,.12,.12,.8,'#899b9b',0,a[2])}
+ if(Math.max(a[2],b[2])>.35)for(let edge of [-width+.1,width-.1]){if(rampRailOpening(A,B,edge))continue;strip(edge,edge+Math.sign(edge)*.12,.85,'#c2ccca');face([[a[0]+A.nx*edge,a[2]+.63,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]+.63,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.85,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.85,a[1]+A.nz*edge]],'#aebcba');if(i%4===0)cube(a[0]+A.nx*edge,a[1]+A.nz*edge,.12,.12,.8,'#899b9b',0,a[2])}
  if(travel>nextArrow){nextArrow=travel+80;let mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2,my=(a[2]+b[2])/2+.08;face([[mx+A.dx*2,my,mz+A.dz*2],[mx-A.dx*.3+A.nx*.65,my,mz-A.dz*.3+A.nz*.65],[mx-A.dx*.3-A.nx*.65,my,mz-A.dz*.3-A.nz*.65]],'#f4f0df');face([[mx-A.dx*2+A.nx*.17,my,mz-A.dz*2+A.nz*.17],[mx+A.nx*.17,my,mz+A.nz*.17],[mx-A.nx*.17,my,mz-A.nz*.17],[mx-A.dx*2-A.nx*.17,my,mz-A.dz*2-A.nz*.17]],'#f4f0df')}
  if(i%12===0&&a[2]>2.5){cube(a[0],a[1],1.2,1.5,a[2]-.7,'#a6ada9');cube(a[0],a[1],width*2-.1,1.4,.5,'#b4b9af',Math.atan2(A.dx,A.dz),a[2]-1.0)}
  }}}
@@ -56,13 +56,27 @@ function freewayGores(){for(let side=0;side<4;side++)for(let type of ['entry','e
  }}
 
 
+// Guardrail gaps follow the actual ramp pavement, not just nominal merge angles.
+const freewayRailGapCache=new Map();
+function freewayRailOpening(a,b){
+ const key=a.toFixed(8)+':'+b.toFixed(8);if(freewayRailGapCache.has(key))return freewayRailGapCache.get(key);
+ let open=false;
+ for(let j=0;j<=4;j++){const theta=a+(b-a)*j/4,near=rampNearest(579.5*Math.cos(theta),579.5*Math.sin(theta));
+  if(highwayOpening(theta)||(near.ramp&&Math.abs(near.height-HIGHWAY_Y)<1.5&&near.distance<rampHalfWidth(near.ramp,near.index)+2)){open=true;break}
+ }
+ freewayRailGapCache.set(key,open);return open;
+}
+function rampRailOpening(A,B,edge){
+ return [A,B].some(f=>f.p[2]>HIGHWAY_Y-1.4&&Math.hypot(f.p[0]+f.nx*edge,f.p[1]+f.nz*edge)<580.5);
+}
+
 function drawFreeway(){const y=HIGHWAY_Y;for(let i=0;i<360;i++){let a=i*Math.PI/180,b=(i+1)*Math.PI/180;
  ringPatch(a,b,540,580,'#9ca7a4',y-.75);ringPatch(a,b,541,579,'#414d55',y+.02);
  ringPatch(a,b,541,543,'#38434a',y+.03);if(!highwayOpening(a))ringPatch(a,b,577,579,'#38434a',y+.03);
  ringPatch(a,b,559,561,'#b6bfb7',y+.68);
  for(let r of [559,561])face([[r*Math.cos(a),y,r*Math.sin(a)],[r*Math.cos(b),y,r*Math.sin(b)],[r*Math.cos(b),y+.68,r*Math.sin(b)],[r*Math.cos(a),y+.68,r*Math.sin(a)]],'#a8b3aa');
  for(let r of [543.05,558.75,561.1,577.05]){let outside=r>570,opening=outside&&highwayOpening(a);if(!opening)ringPatch(a,b,r,r+.13,r<544||outside?'#f4f0df':'#eac85c',y+.085)}
- for(let r of [540.5,579.5]){let gap=r>570&&highwayOpening(a);face([[r*Math.cos(a),y-.75,r*Math.sin(a)],[r*Math.cos(b),y-.75,r*Math.sin(b)],[r*Math.cos(b),y+.02,r*Math.sin(b)],[r*Math.cos(a),y+.02,r*Math.sin(a)]],'#9eaaa7');if(!gap){ringPatch(a,b,r-.18,r+.18,'#c1c9c2',y+.85);face([[r*Math.cos(a),y,r*Math.sin(a)],[r*Math.cos(b),y,r*Math.sin(b)],[r*Math.cos(b),y+.85,r*Math.sin(b)],[r*Math.cos(a),y+.85,r*Math.sin(a)]],'#b1bbb5')}}
+ for(let r of [540.5,579.5]){let gap=r>570&&freewayRailOpening(a,b);face([[r*Math.cos(a),y-.75,r*Math.sin(a)],[r*Math.cos(b),y-.75,r*Math.sin(b)],[r*Math.cos(b),y+.02,r*Math.sin(b)],[r*Math.cos(a),y+.02,r*Math.sin(a)]],'#9eaaa7');if(!gap){ringPatch(a,b,r-.18,r+.18,'#c1c9c2',y+.85);face([[r*Math.cos(a),y,r*Math.sin(a)],[r*Math.cos(b),y,r*Math.sin(b)],[r*Math.cos(b),y+.85,r*Math.sin(b)],[r*Math.cos(a),y+.85,r*Math.sin(a)]],'#b1bbb5')}}
  if(i%12===2){for(let r of [550,570]){let px=r*Math.cos(a),pz=r*Math.sin(a);cube(px,pz,1.8,2.2,y-1.0,'#a4aaa3')}cube(560*Math.cos(a),560*Math.sin(a),40,2,.5,'#aab3ac',Math.PI/2-a,y-1.05)}
  }
  // Three broken lane dividers in each carriageway make four travel lanes.
