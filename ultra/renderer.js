@@ -190,7 +190,7 @@ export function createRenderer(overlay) {
  block(steeringWheel,chrome,0,0,0,.43,.025,.025);block(steeringWheel,trim,0,-.10,0,.035,.20,.03);block(steeringWheel,trim,0,0,.01,.12,.08,.04);
  const screenCanvas=document.createElement('canvas');screenCanvas.width=512;screenCanvas.height=128;const screenCtx=screenCanvas.getContext('2d');
  const screenTexture=new THREE.CanvasTexture(screenCanvas);screenTexture.colorSpace=THREE.SRGBColorSpace;
- const screen=new THREE.Mesh(new THREE.PlaneGeometry(.68,.17),new THREE.MeshBasicMaterial({map:screenTexture}));screen.position.set(.12,1.005,.445);screen.rotation.y=Math.PI;cockpit.add(screen);
+ const screen=new THREE.Mesh(new THREE.PlaneGeometry(.68,.17),new THREE.MeshBasicMaterial({map:screenTexture}));screen.name='cockpit-instruments';screen.position.set(.12,1.005,.445);screen.rotation.y=Math.PI;cockpit.add(screen);
  const mirrorTarget=new THREE.WebGLRenderTarget(384,144),mirrorCamera=new THREE.PerspectiveCamera(65,384/144,.3,420);
  const mirror=new THREE.Mesh(new THREE.PlaneGeometry(.38,.14),new THREE.MeshBasicMaterial({map:mirrorTarget.texture}));
  mirror.position.set(.18,1.73,.70);mirror.rotation.y=Math.PI;cockpit.add(mirror);
@@ -231,7 +231,7 @@ export function createRenderer(overlay) {
    }
    for(let i=carIndex;i<cars.length;i++)cars[i].root.visible=false;
    instanceCars(carIndex);
-   cockpit.visible=!player.thirdPerson&&player.gear>0;cockpit.position.set(player.x,player.groundY,player.z);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
+   cockpit.visible=!player.thirdPerson&&player.gear>0;cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
    const hud=Math.round(Math.abs(player.speed)*2.237)+'   '+(player.park?'P':player.gear<0?'R':'D')+'   '+(player.signal<0?'◀':player.signal>0?'▶':'');
    if(hud!==lastHud){screenCtx.fillStyle='#07131b';screenCtx.fillRect(0,0,512,128);screenCtx.fillStyle='#d8f3eb';screenCtx.font='bold 70px sans-serif';screenCtx.fillText(hud,20,85);screenCtx.fillStyle='#8aacb6';screenCtx.font='18px sans-serif';screenCtx.fillText('MPH     JASMINE / ULTRA',22,117);screenTexture.needsUpdate=true;lastHud=hud}
    mirror.visible=quality!=='low';if(cockpit.visible&&mirror.visible&&mirrorFrame++%(quality==='high'?2:4)===0){
