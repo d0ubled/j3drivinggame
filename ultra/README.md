@@ -2,7 +2,7 @@
 
 [Play Ultra](../ultra.html) · [Play Classic](../classic.html)
 
-Ultra is a separate graphics edition. The original game is preserved unchanged in `classic.html`; `index.html` remains the Classic entry point with a link to Ultra.
+Ultra is a separate graphics edition. The original game remains available in `classic.html`, with explicitly requested shared usability fixes; `index.html` remains the Classic entry point with a link to Ultra.
 
 ## Included in this release
 
@@ -19,7 +19,7 @@ This is a procedural graphics upgrade, not a commercial photorealistic asset pac
 
 ## Files
 
-- `../classic.html`: exact source snapshot before Ultra.
+- `../classic.html`: Classic edition, including shared HUD usability fixes. The original snapshot is retained in Git history.
 - `../index.html`: Classic with an Ultra navigation link.
 - `../ultra.html`: Ultra UI and error/loading handling.
 - `game.js`: driving simulation, HUD and world geometry.
