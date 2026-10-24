@@ -115,7 +115,7 @@ function getViewAngle(){let a=yaw+(gear<0?Math.PI:0);if(keys.z)a-=Math.PI/2;if(k
  const points=pts.map(p=>[p[0],p[1]+modelLift,p[2]]);
  faces.push({points,color,material,glass:parseInt(color.slice(5,7),16)>parseInt(color.slice(1,3),16)*1.25&&parseInt(color.slice(5,7),16)>parseInt(color.slice(3,5),16)*.9});
 }
-function rect(a,b,d,e,col,y=.015){if(b-a>24||e-d>24){for(let xx=a;xx<b;xx+=20)for(let zz=d;zz<e;zz+=20)face([[xx,y,zz],[Math.min(b,xx+20),y,zz],[Math.min(b,xx+20),y,Math.min(e,zz+20)],[xx,y,Math.min(e,zz+20)]],col);return}face([[a,y,d],[b,y,d],[b,y,e],[a,y,e]],col)}function cube(a,b,w,l,h,col,rotation=0,base=0,material=null){if(Math.hypot(a-x,b-z)>360)return;let pts=[];for(let yy of [base,base+h])for(let pair of [[-w/2,-l/2],[w/2,-l/2],[w/2,l/2],[-w/2,l/2]])pts.push([a+pair[0]*Math.cos(rotation)+pair[1]*Math.sin(rotation),yy,b-pair[0]*Math.sin(rotation)+pair[1]*Math.cos(rotation)]);for(let ids of [[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]]){let pp=ids.map(i=>pts[i]);let u=pp[1].map((v,i)=>v-pp[0][i]),v=pp[2].map((v,i)=>v-pp[0][i]);let normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],length=Math.hypot(...normal)||1;if(ids[0]===4)normal=normal.map(v=>-v);let light=.69+.39*Math.max(0,(normal[0]*.5+normal[1]*.8+normal[2]*.3)/length);face(pp,col,material)}}function oldCar(a,b,r,col,braking=false){const shadow=[[-1.2,-2.5],[1.2,-2.5],[1.2,2.5],[-1.2,2.5]].map(([dx,dz])=>[a+dx*Math.cos(r)+dz*Math.sin(r),.075,b-dx*Math.sin(r)+dz*Math.cos(r)]);face(shadow,'#343f40');cube(a,b,1.85,4.3,.65,col,r,.35);cube(a-Math.sin(r)*.2,b-Math.cos(r)*.2,1.58,2.15,.62,'#29424b',r,1);cube(a,b,1.6,1.5,.09,col,r,1.62);for(let side of [-1,1])for(let end of [-1,1]){let dx=side*.9,dz=end*1.35;cube(a+dx*Math.cos(r)+dz*Math.sin(r),b-dx*Math.sin(r)+dz*Math.cos(r),.22,.7,.55,'#172329',r,.15)}for(let side of [-1,1])cube(a+side*.61*Math.cos(r)-2.17*Math.sin(r),b-side*.61*Math.sin(r)-2.17*Math.cos(r),.38,.07,.2,braking?'#ff4030':'#943c35',r,.65);for(let side of [-1,1]){cube(a+side*.61*Math.cos(r)+2.17*Math.sin(r),b-side*.61*Math.sin(r)+2.17*Math.cos(r),.42,.08,.19,'#fff2ce',r,.68);cube(a+side*1.02*Math.cos(r)+.6*Math.sin(r),b-side*1.02*Math.sin(r)+.6*Math.cos(r),.22,.3,.16,col,r,1.18)}cube(a-2.19*Math.sin(r),b-2.19*Math.cos(r),.47,.06,.16,'#dedbd2',r,.46)}
+function rect(a,b,d,e,col,y=.015){if(b-a>24||e-d>24){for(let xx=a;xx<b;xx+=20)for(let zz=d;zz<e;zz+=20)face([[xx,y,zz],[Math.min(b,xx+20),y,zz],[Math.min(b,xx+20),y,Math.min(e,zz+20)],[xx,y,Math.min(e,zz+20)]],col);return}face([[a,y,d],[b,y,d],[b,y,e],[a,y,e]],col)}function cube(a,b,w,l,h,col,rotation=0,base=0,material=null){if(Math.hypot(a-x,b-z)>(h>25?650:360))return;let pts=[];for(let yy of [base,base+h])for(let pair of [[-w/2,-l/2],[w/2,-l/2],[w/2,l/2],[-w/2,l/2]])pts.push([a+pair[0]*Math.cos(rotation)+pair[1]*Math.sin(rotation),yy,b-pair[0]*Math.sin(rotation)+pair[1]*Math.cos(rotation)]);for(let ids of [[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]]){let pp=ids.map(i=>pts[i]);let u=pp[1].map((v,i)=>v-pp[0][i]),v=pp[2].map((v,i)=>v-pp[0][i]);let normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],length=Math.hypot(...normal)||1;if(ids[0]===4)normal=normal.map(v=>-v);let light=.69+.39*Math.max(0,(normal[0]*.5+normal[1]*.8+normal[2]*.3)/length);face(pp,col,material)}}function oldCar(a,b,r,col,braking=false){const shadow=[[-1.2,-2.5],[1.2,-2.5],[1.2,2.5],[-1.2,2.5]].map(([dx,dz])=>[a+dx*Math.cos(r)+dz*Math.sin(r),.075,b-dx*Math.sin(r)+dz*Math.cos(r)]);face(shadow,'#343f40');cube(a,b,1.85,4.3,.65,col,r,.35);cube(a-Math.sin(r)*.2,b-Math.cos(r)*.2,1.58,2.15,.62,'#29424b',r,1);cube(a,b,1.6,1.5,.09,col,r,1.62);for(let side of [-1,1])for(let end of [-1,1]){let dx=side*.9,dz=end*1.35;cube(a+dx*Math.cos(r)+dz*Math.sin(r),b-dx*Math.sin(r)+dz*Math.cos(r),.22,.7,.55,'#172329',r,.15)}for(let side of [-1,1])cube(a+side*.61*Math.cos(r)-2.17*Math.sin(r),b-side*.61*Math.sin(r)-2.17*Math.cos(r),.38,.07,.2,braking?'#ff4030':'#943c35',r,.65);for(let side of [-1,1]){cube(a+side*.61*Math.cos(r)+2.17*Math.sin(r),b-side*.61*Math.sin(r)+2.17*Math.cos(r),.42,.08,.19,'#fff2ce',r,.68);cube(a+side*1.02*Math.cos(r)+.6*Math.sin(r),b-side*1.02*Math.sin(r)+.6*Math.cos(r),.22,.3,.16,col,r,1.18)}cube(a-2.19*Math.sin(r),b-2.19*Math.cos(r),.47,.06,.16,'#dedbd2',r,.46)}
 
 function signalHead(rx,rz,side,axis){if(Math.hypot(rx-x,rz-z)>280)return;const color=phase(axis);function at(lateral,along,y){return axis==='z'?[rx+side*lateral,y,rz-side*along]:[rx-side*along,y,rz-side*lateral]}function part(lateral,along,y,w,l,h,col){let p=at(lateral,along,y);cube(p[0],p[2],axis==='z'?w:l,axis==='z'?l:w,h,col,0,y)}
 part(8.8,-12,0,.18,.18,6.6,'#596164');part(5.1,-12,6.35,7.6,.18,.18,'#667375');
@@ -128,8 +128,8 @@ function drawWorld(){
  if(key!==staticKey||!staticFaces){faces=[];face([[x-850,-.04,z-850],[x+850,-.04,z-850],[x+850,-.04,z+850],[x-850,-.04,z+850]],'#819b76');if(!graphics){c.fillStyle='#819b76';c.fillRect(0,H*.43,W,H*.57);}for(let r of roads){rect(r-9.5,r+9.5,-342,342,'#cbc9b8');rect(-342,342,r-9.5,r+9.5,'#cbc9b8');rect(r-8,r+8,-342,342,'#48545b',.02);rect(-342,342,r-8,r+8,'#48545b',.02);for(let a=-340;a<340;a+=5){if(roadDist(a)<12)continue;for(let off of [-.13,.13]){rect(r+off-.035,r+off+.035,a,a+5,'#e3c474',.04);rect(a,a+5,r+off-.035,r+off+.035,'#e3c474',.04)}for(let off of [-4,4]){rect(r+off-.04,r+off+.04,a,a+2.5,'#d8dbd3',.04);rect(a,a+2.5,r+off-.04,r+off+.04,'#d8dbd3',.04)}}}for(let r of roads)for(let v=-336;v<340;v+=16){if(roadDist(v)<14)continue;rect(r-7.8,r-7.3,v,v+1,'#38464d',.03);rect(r+7.3,r+7.8,v,v+1,'#38464d',.03);rect(v,v+1,r-7.8,r-7.3,'#38464d',.03);rect(v,v+1,r+7.3,r+7.8,'#38464d',.03);rect(r-9.4,r-8.2,v,v+.055,'#9da69d',.018);rect(r+8.2,r+9.4,v,v+.055,'#9da69d',.018)}rect(8,29,65,79,'#59636a',.045);rect(25,88,38,108,'#626a6a',.025);for(let b of bays){rect(b.x-2.8,b.x-2.7,b.z-4,b.z+4,'#e1e9d8',.05);rect(b.x+2.7,b.x+2.8,b.z-4,b.z+4,'#e1e9d8',.05);rect(b.x-2.8,b.x+2.8,b.z+(b.z<70?-4:4),b.z+(b.z<70?-3.9:4.1),'#e1e9d8',.05);}
 for(let rx of roads)for(let rz of roads){rect(rx+.2,rx+7.7,rz-12,rz-11.65,'#eee8d8',.065);rect(rx-7.7,rx-.2,rz+11.65,rz+12,'#eee8d8',.065);rect(rx-12,rx-11.65,rz-7.7,rz-.2,'#eee8d8',.065);rect(rx+11.65,rx+12,rz+.2,rz+7.7,'#eee8d8',.065);for(let k=-7;k<8;k+=2){rect(rx+k,rx+k+1,rz-11,rz-9,'#dddcca',.06);rect(rx+k,rx+k+1,rz+9,rz+11,'#dddcca',.06);rect(rx-11,rx-9,rz+k,rz+k+1,'#dddcca',.06);rect(rx+9,rx+11,rz+k,rz+k+1,'#dddcca',.06)}for(let side of [-1,1]){signalHead(rx,rz,side,'z');signalHead(rx,rz,side,'x')}}
 
-for(let a=-300;a<340;a+=40)for(let b=-300;b<340;b+=40){if(roadDist(a)<17||roadDist(b)<17||(a>10&&a<105&&b>15&&b<130))continue;let h=5+Math.abs(a+b)%13;if(Math.hypot(a-x,b-z)>360)continue;cube(a,b,23,23,h,['#c5b5a3','#a8a8a0','#b4b8ae'][Math.abs(a+b)%3],0,0,5);cube(a,b,24,24,.35,'#c6c5bc',0,h,2);for(let y=2;y<h-1;y+=2.6)for(let w=-8;w<=8;w+=4){face([[a+w-1,y,b-11.52],[a+w+1,y,b-11.52],[a+w+1,y+1.4,b-11.52],[a+w-1,y+1.4,b-11.52]],'#62848e');face([[a+w-1,y,b+11.52],[a+w+1,y,b+11.52],[a+w+1,y+1.4,b+11.52],[a+w-1,y+1.4,b+11.52]],'#87a1a7');face([[a-11.52,y,b+w-1],[a-11.52,y,b+w+1],[a-11.52,y+1.4,b+w+1],[a-11.52,y+1.4,b+w-1]],'#527580');face([[a+11.52,y,b+w-1],[a+11.52,y,b+w+1],[a+11.52,y+1.4,b+w+1],[a+11.52,y+1.4,b+w-1]],'#7899a1')}}for(let a=-300;a<=340;a+=30){if(roadDist(a)>18){cube(-11,a,.5,.5,3,'#7b725d');tree(-11,a,1);cube(a,-11,.5,.5,3,'#7b725d');tree(a,-11,1)}}
- streetDetails();ultraStreetDetails();drawFreeway();staticFaces=faces;staticKey=key;
+ultraBuildings();for(let a=-300;a<=340;a+=30){if(roadDist(a)>18){cube(-11,a,.5,.5,3,'#7b725d');tree(-11,a,1);cube(a,-11,.5,.5,3,'#7b725d');tree(a,-11,1)}}
+ streetDetails();ultraStreetDetails();drawFreeway();ultraFreewayDetails();staticFaces=faces;staticKey=key;
  }
  faces=staticFaces;
  for(const v of traffic){const p=carPose(v.s,v.route);car(p.x,p.z,p.a,v.color,v.braking,reactiveIndicator(v,cityBlinker(v)))}
@@ -180,7 +180,7 @@ function tree(a,b,scale=1){
 }
 function streetDetails(){
 for(let r of roads)for(let q=-280;q<=280;q+=40){if(roadDist(q)<20)continue;for(let side of [-1,1]){let a=r+side*10.7,b=q;if(Math.hypot(a-x,b-z)>190)continue;cube(a,b,.13,.13,5.8,'#55636a');cube(a-side*.65,b,1.4,.16,.12,'#68777d',0,5.7);cube(a-side*1.2,b,.6,.33,.08,'#f4ebc9',0,5.65);if(q%80===40)tree(a+side*2.8,b+7,.85)}}
-for(let a=-300;a<340;a+=40)for(let b=-300;b<340;b+=40){if(roadDist(a)<17||roadDist(b)<17||(a>10&&a<105&&b>15&&b<130)||Math.hypot(a-x,b-z)>160)continue;let height=5+Math.abs(a+b)%13;if(Math.hypot(a-x,b-z)<95){for(let floor=2;floor<height-1;floor+=2.6){cube(a,b-11.58,22,.16,.09,'#b5b6ad',0,floor-.1);cube(a,b+11.58,22,.16,.09,'#b5b6ad',0,floor-.1);cube(a-11.58,b,.16,22,.09,'#a5a89f',0,floor-.1);cube(a+11.58,b,.16,22,.09,'#a5a89f',0,floor-.1)}cube(a,b,23.6,23.6,.22,'#8f928b',0,.05)}cube(a+4,b-3,3,4,1,'#91a2a1',0,height+.4);cube(a-4,b+2,2.1,2.4,.7,'#7d8d91',0,height+.4);cube(a,b-11.59,2.3,.10,2.7,'#3d5660',0,.1);cube(a,b-11.68,2.8,.85,.13,'#b7bdb3',0,2.9);cube(a+1,b-11.68,.08,.06,.55,'#d8d9c8',0,1.0);if(Math.abs(a+b)%3===0){cube(a,b-12.4,6,1.7,.20,'#567d77',0,3.3);for(let w=-2;w<=2;w++)cube(a+w,b-13.1,.5,.17,.26,w%2?'#d6d1b5':'#537e75',0,3.1)}}
+for(let a=-300;a<340;a+=40)for(let b=-300;b<340;b+=40){if(roadDist(a)<17||roadDist(b)<17||(a>10&&a<105&&b>15&&b<130)||Math.hypot(a-x,b-z)>160)continue;let height=ultraBuildingHeight(a,b),roofBase=height+(ultraBuildingStyle(a,b)===2?4:0);if(Math.hypot(a-x,b-z)<95){for(let floor=2;floor<Math.min(height,7)-1;floor+=3.2){cube(a,b-11.58,22,.16,.09,'#b5b6ad',0,floor-.1);cube(a,b+11.58,22,.16,.09,'#b5b6ad',0,floor-.1);cube(a-11.58,b,.16,22,.09,'#a5a89f',0,floor-.1);cube(a+11.58,b,.16,22,.09,'#a5a89f',0,floor-.1)}cube(a,b,23.6,23.6,.22,'#8f928b',0,.05)}cube(a+4,b-3,3,4,1,'#91a2a1',0,roofBase+.4);cube(a-4,b+2,2.1,2.4,.7,'#7d8d91',0,roofBase+.4);cube(a,b-11.59,2.3,.10,2.7,'#3d5660',0,.1);cube(a,b-11.68,2.8,.85,.13,'#b7bdb3',0,2.9);cube(a+1,b-11.68,.08,.06,.55,'#d8d9c8',0,1.0);if(Math.abs(a+b)%3===0){cube(a,b-12.4,6,1.7,.20,'#567d77',0,3.3);for(let w=-2;w<=2;w++)cube(a+w,b-13.1,.5,.17,.26,w%2?'#d6d1b5':'#537e75',0,3.1)}}
 // Low shrubs and realistic tree silhouettes around the lot.
 for(let q=30;q<88;q+=12){tree(q,112,.8);cube(q,114,8,1.6,.7,'#66855e')}
 for(let side=0;side<4;side++){let p=rotatePoint([480,25],side*Math.PI/2);cube(p[0],p[1],.2,.2,5,'#667779');let p2=rotatePoint([480,25],side*Math.PI/2);cube(p2[0],p2[1],6,.2,1.5,'#3e7565',side*Math.PI/2,4.2)}
@@ -255,5 +255,83 @@ function ultraStreetDetails(){
    if(!(road===0&&side===1&&q>=56&&q<=80))cube(road+side*8.16,q+3.8,.24,7.6,.15,'#b5b4a9',0,.02,2);
    cube(q+3.8,road+side*8.16,7.6,.24,.15,'#b5b4a9',0,.02,2);
   }
+ }
+}
+
+function ultraBuildingStyle(a,b){const n=Math.imul(Math.round((a+300)/40)+1,73856093)^Math.imul(Math.round((b+300)/40)+1,19349663);return (n>>>16)%4}
+function ultraBuildingHeight(a,b){
+ const style=ultraBuildingStyle(a,b),central=Math.abs(a)<180&&Math.abs(b)<180;
+ return central?18+style*8:7+style*3.2;
+}
+function ultraBuildings(){
+ for(let a=-300;a<340;a+=40)for(let b=-300;b<340;b+=40){
+  if(roadDist(a)<17||roadDist(b)<17||(a>10&&a<105&&b>15&&b<130))continue;
+  const distance=Math.hypot(a-x,b-z),style=ultraBuildingStyle(a,b),h=ultraBuildingHeight(a,b);
+  if(distance>(h>25?650:360))continue;
+  const wall=['#b9ae99','#c6bba9','#9cabae','#a58976'][style],frame=['#b7b4a6','#d6cdbb','#556771','#c4b59f'][style];
+  cube(a,b,23,23,h,wall,0,0,style===3?5:4);
+  cube(a,b,23.6,23.6,.3,'#8e9693',0,h,2);
+  // A recessed roof, parapets and stepped upper floors make distinct silhouettes.
+  if(distance<360){
+   rect(a-10.8,a+10.8,b-10.8,b+10.8,'#586367',h+.32);
+   for(const side of [-1,1]){cube(a+side*11.4,b,.3,23,.6,frame,0,h+.3);cube(a,b+side*11.4,23,.3,.6,frame,0,h+.3)}
+   if(style===2){cube(a,b,14,14,3.6,'#69808a',0,h+.3,3);cube(a,b,14.6,14.6,.25,'#c2c7be',0,h+3.9)}
+   if(style===1){for(const side of [-1,1])cube(a+side*7,b,1.1,17,.65,frame,0,h+.3)}
+  }
+  const floorStep=3.2;
+  for(let level=4.2;level<h-1.8;level+=floorStep){
+   for(let side=0;side<4;side++){
+    function point(u,y,v=11.53){const q=rotatePoint([u,v],side*Math.PI/2);return[a+q[0],y,b+q[1]]}
+    const paneWidth=style===2?3.55:2.45;
+    for(let col=-8;col<=8;col+=4){
+     const shade=(Math.floor(level)+col+style)%3===0?'#597984':'#7696a0';
+     face([point(col-paneWidth/2,level),point(col+paneWidth/2,level),point(col+paneWidth/2,level+2.1),point(col-paneWidth/2,level+2.1)],shade,3);
+     if(distance<180){
+      face([point(col-.045,level,11.56),point(col+.045,level,11.56),point(col+.045,level+2.1,11.56),point(col-.045,level+2.1,11.56)],frame,4);
+      face([point(col-paneWidth/2,level+.98,11.57),point(col+paneWidth/2,level+.98,11.57),point(col+paneWidth/2,level+1.05,11.57),point(col-paneWidth/2,level+1.05,11.57)],frame,4);
+     }
+    }
+    if(distance<260)face([point(-11.5,level-.2,11.57),point(11.5,level-.2,11.57),point(11.5,level-.08,11.57),point(-11.5,level-.08,11.57)],frame,4);
+   }
+  }
+  // Street-level glazed storefront bays and a projecting canopy.
+  if(distance<200){
+   for(let w of [-7,-3,3,7]){cube(a+w,b-11.58,2.5,.08,2.6,'#45626d',0,.35,3);cube(a+w,b-11.64,.07,.08,2.6,'#a7aaa2',0,.35)}
+   cube(a,b-12.0,19,1.1,.18,frame,0,3.25);
+   for(const side of [-1,1]){if(roadDist(a+side*10)>8.3&&roadDist(b-12.1)>8.3)cube(a+side*10,b-12.1,.22,.22,3.25,frame);if(roadDist(a+side*10)>10&&roadDist(b-13.8)>10){cube(a+side*10,b-13.8,1.7,1.2,.55,'#929a8b');cube(a+side*10,b-13.8,1.45,1,.75,'#527250',0,.55)}}
+  }
+ }
+}
+function ultraFreewayDetails(){
+ const y=HIGHWAY_Y;
+ // Longitudinal girders below the deck; no additional objects in travel lanes.
+ for(let i=0;i<360;i+=2){
+  const a=i*Math.PI/180,b=(i+2)*Math.PI/180;
+  for(const r of [545,553,567,575]){
+   face([[r*Math.cos(a),y-1.35,r*Math.sin(a)],[r*Math.cos(b),y-1.35,r*Math.sin(b)],[r*Math.cos(b),y-.74,r*Math.sin(b)],[r*Math.cos(a),y-.74,r*Math.sin(a)]],'#7b8a89',4);
+   ringPatch(a,b,r-.22,r+.22,'#85928d',y-1.35);
+  }
+  if(i%6===0){
+   for(const r of [547,551,555,565,569,573])ringPatch(a,a+.00045,r-.10,r+.10,'#e7e6c9',y+.10);
+  }
+  if(i%12===0){
+   // Small joints across each carriageway, stopping at the median.
+   for(const span of [[541,559],[561,579]])ringPatch(a,a+.00014,span[0],span[1],'#333f43',y+.055);
+   const px=560*Math.cos(a),pz=560*Math.sin(a),rot=Math.PI/2-a;
+   cube(px,pz,.14,.14,7,'#778787',0,y+.7);
+   cube(px,pz,8,.12,.12,'#8e9a98',rot,y+7.6);
+   for(const r of [556.4,563.6])cube(r*Math.cos(a),r*Math.sin(a),.65,.35,.10,'#f4f0df',rot,y+7.5);
+  }
+  // Reflectors sit on existing barriers, and respect all ramp openings.
+  if(i%4===0)for(const r of [540.5,579.5]){
+   if(r>570&&freewayRailOpening(a,b))continue;
+   cube(r*Math.cos(a),r*Math.sin(a),.09,.25,.18,r>570?'#eee9ca':'#e2bb59',-a,y+.58);
+  }
+ }
+ // Planting is confined to the unused area inside the freeway.
+ for(let i=0;i<32;i++){
+  const a=i*Math.PI*2/32,r=440+(i%3)*14,px=r*Math.cos(a),pz=r*Math.sin(a);
+  if(Math.abs(px)<24||Math.abs(pz)<24)continue;
+  tree(px,pz,1.1+(i%3)*.2);
  }
 }
