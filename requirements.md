@@ -232,3 +232,17 @@ The 70 mph speed limit remains in effect even though the player's maximum speed 
 - Renderer checks used mathematical/state checks and mocked rendering interfaces. They do not substitute for real-browser shader compilation, visual inspection, or a driving playtest.
 - A successful in-browser visual review has not been recorded. Confirm the ramp experience, lighting, markings, frame rate, and mobile usability by playtesting.
 - Treat the broad “crash into anything” requirement and general NPC signaling behavior as acceptance goals; decorative-object collision coverage and every traffic interaction are not proven by the geometry tests above.
+
+
+## 17. Classic and Ultra editions
+
+- Preserve the existing game as **Classic**, with an unchanged snapshot at `classic.html`.
+- Keep the original site entry point on Classic; add an explicit link to the new edition.
+- Implement graphics improvements in a separate **Ultra** page at `ultra.html`.
+- Ultra uses Three.js r170, separate game/renderer modules, physical materials, real shadows, an improved vehicle/cockpit presentation, rear-view mirror, scenery detail and quality presets.
+- Both editions retain four freeway lanes each way, the current speed limits, widened entrances, corrected guardrail openings, parking and traffic behavior.
+- Classic must remain independently playable if Ultra or its external renderer dependency fails.
+- Ultra is still a static GitHub Pages application; it requires no backend or production build step.
+- The single-file/no-renderer-dependency description earlier in this document now applies to Classic. Ultra uses modules and a pinned external Three.js download.
+- The full graphics direction also includes richer scenery assets and further postprocessing/performance polish. See `ultra/README.md` for shipped features and remaining work.
+- CPU-side simulation/geometry checks are required, but must not be described as real-browser visual or GPU shader verification.
