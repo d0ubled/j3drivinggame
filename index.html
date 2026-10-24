@@ -13,7 +13,7 @@ function rotatePoint(p,a){return[p[0]*Math.cos(a)-p[1]*Math.sin(a),p[0]*Math.sin
 const HIGHWAY_Y=7.2;let groundY=0,modelLift=0;
 function highwayRelativeAngle(a){return Math.atan2(Math.sin(a*4),Math.cos(a*4))/4}
 function highwayOpening(a){let q=Math.abs(highwayRelativeAngle(a));return q>.04&&q<.19}
-function roadSurface(a,b,reference=groundY){let choices=[];const rr=Math.hypot(a,b);if(rr>541&&rr<579&&Math.abs(rr-560)>1.1)choices.push(HIGHWAY_Y);const near=rampNearest(a,b);if(near.distance<2.7)choices.push(near.height);if((Math.abs(a)<342&&Math.abs(b)<342&&(roadDist(a)<8||roadDist(b)<8))||(a>8&&a<29&&b>65&&b<79)||(a>25&&a<88&&b>38&&b<108))choices.push(0);for(let side=0;side<4;side++){let p=rotatePoint([a,b],-side*Math.PI/2);if(p[0]>318&&p[0]<675&&Math.abs(p[1])<8)choices.push(0)}let best=choices.sort((a,b)=>Math.abs(a-reference)-Math.abs(b-reference))[0];return best!==undefined&&Math.abs(best-reference)<1.4?best:undefined}
+function roadSurface(a,b,reference=groundY){let choices=[];const rr=Math.hypot(a,b);if(rr>541&&rr<579&&Math.abs(rr-560)>1.1)choices.push(HIGHWAY_Y);const near=rampNearest(a,b);if(near.ramp&&near.distance<rampHalfWidth(near.ramp,near.index))choices.push(near.height);const mergeAngle=highwayRelativeAngle(Math.atan2(b,a));if(mergeAngle>=-.180001&&mergeAngle<=-.049999){const u=(mergeAngle+.18)/.13;if(rr>=577&&rr<579+4*slopeBlend(1-u))choices.push(HIGHWAY_Y)}if((Math.abs(a)<342&&Math.abs(b)<342&&(roadDist(a)<8||roadDist(b)<8))||(a>8&&a<29&&b>65&&b<79)||(a>25&&a<88&&b>38&&b<108))choices.push(0);for(let side=0;side<4;side++){let p=rotatePoint([a,b],-side*Math.PI/2);if(p[0]>318&&p[0]<675&&Math.abs(p[1])<8)choices.push(0)}let best=choices.sort((a,b)=>Math.abs(a-reference)-Math.abs(b-reference))[0];return best!==undefined&&Math.abs(best-reference)<1.4?best:undefined}
 function slopeBlend(u){u=Math.max(0,Math.min(1,u));return u*u*(3-2*u)}
 const ramps=[];for(let side=0;side<4;side++)for(let type of ['entry','exit']){
  const R=579*Math.sin(.18)-6,cx=579*Math.cos(.18)+R,cz=(type==='entry'?-1:1)*(R+6),points=[];
@@ -31,21 +31,24 @@ const ramps=[];for(let side=0;side<4;side++)for(let type of ['entry','exit']){
 }
 function rampNearest(px,pz){let best={distance:Infinity,ramp:null,index:0,height:0};for(let ramp of ramps)for(let i=0;i<ramp.points.length-1;i++){let a=ramp.points[i],b=ramp.points[i+1],dx=b[0]-a[0],dz=b[1]-a[1],u=Math.max(0,Math.min(1,((px-a[0])*dx+(pz-a[1])*dz)/(dx*dx+dz*dz))),distance=Math.hypot(px-a[0]-u*dx,pz-a[1]-u*dz);if(distance<best.distance)best={distance,ramp,index:i+u,height:a[2]+(b[2]-a[2])*u}}return best}
 
+function rampHalfWidth(ramp,i){return ramp.type==='entry'?2+2*slopeBlend(i/32):2.7}
 function rampFrame(ramp,i){let pts=ramp.points,p=pts[i],a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz)||1;return{p,dx:dx/len,dz:dz/len,nx:-dz/len,nz:dx/len}}
 function polarBand(a,b,innerA,outerA,innerB,outerB,y,col){face([[innerA*Math.cos(a),y,innerA*Math.sin(a)],[outerA*Math.cos(a),y,outerA*Math.sin(a)],[outerB*Math.cos(b),y,outerB*Math.sin(b)],[innerB*Math.cos(b),y,innerB*Math.sin(b)]],col)}
 function drawRamps(){for(let ramp of ramps){let n=ramp.points.length-1,travel=0,nextArrow=75;for(let i=0;i<n;i++){let A=rampFrame(ramp,i),B=rampFrame(ramp,i+1),a=A.p,b=B.p,len=Math.hypot(b[0]-a[0],b[1]-a[1]);travel+=len;
  const lead=ramp.type==='entry'?i<32:i>=96,aux=ramp.type==='entry'?i>=112:i<16;
- if(lead||Math.hypot(a[0]-x,a[1]-z)>380)continue;
+ if((lead&&ramp.type!=='entry')||Math.hypot(a[0]-x,a[1]-z)>380)continue;
  if(aux){let u0=ramp.type==='entry'?(i-112)/16:i/16,u1=ramp.type==='entry'?(i-111)/16:(i+1)/16,outerA=579+4*slopeBlend(ramp.type==='entry'?1-u0:u0),outerB=579+4*slopeBlend(ramp.type==='entry'?1-u1:u1),aa=Math.atan2(a[1],a[0]),bb=aa+angle(Math.atan2(b[1],b[0])-aa),y=HIGHWAY_Y;
  polarBand(aa,bb,577,outerA,577,outerB,y+.02,'#414d55');polarBand(aa,bb,577,outerA+.65,577,outerB+.65,y-.65,'#8b9796');
  polarBand(aa,bb,outerA-2.06,outerA-1.92,outerB-2.06,outerB-1.92,y+.075,'#f4f0df');polarBand(aa,bb,outerA+.22,outerA+.45,outerB+.22,outerB+.45,y+.85,'#c4ccca');
  face([[(outerA+.3)*Math.cos(aa),y-.65,(outerA+.3)*Math.sin(aa)],[(outerB+.3)*Math.cos(bb),y-.65,(outerB+.3)*Math.sin(bb)],[(outerB+.3)*Math.cos(bb),y+.85,(outerB+.3)*Math.sin(bb)],[(outerA+.3)*Math.cos(aa),y+.85,(outerA+.3)*Math.sin(aa)]],'#aebcba');continue}
  function strip(lo,hi,offset,col){face([[a[0]+A.nx*lo,a[2]+offset,a[1]+A.nz*lo],[a[0]+A.nx*hi,a[2]+offset,a[1]+A.nz*hi],[b[0]+B.nx*hi,b[2]+offset,b[1]+B.nz*hi],[b[0]+B.nx*lo,b[2]+offset,b[1]+B.nz*lo]],col)}
- strip(-2.7,2.7,.02,'#414d55');strip(-2.05,-1.92,.075,'#f4f0df');strip(1.92,2.05,.075,'#f4f0df');
- if(Math.min(a[2],b[2])>.6){strip(-2.85,2.85,-.65,'#8b9796');for(let edge of [-2.7,2.7])face([[a[0]+A.nx*edge,a[2]-.65,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]-.65,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.02,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.02,a[1]+A.nz*edge]],'#a8b3ad')}
- if(Math.max(a[2],b[2])>.35)for(let edge of [-2.6,2.6]){strip(edge,edge+Math.sign(edge)*.12,.85,'#c2ccca');face([[a[0]+A.nx*edge,a[2]+.63,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]+.63,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.85,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.85,a[1]+A.nz*edge]],'#aebcba');if(i%4===0)cube(a[0]+A.nx*edge,a[1]+A.nz*edge,.12,.12,.8,'#899b9b',0,a[2])}
+ const width=rampHalfWidth(ramp,i),nextWidth=rampHalfWidth(ramp,i+1),wide=ramp.type==='entry';
+ face([[a[0]-A.nx*width,a[2]+.035,a[1]-A.nz*width],[a[0]+A.nx*width,a[2]+.035,a[1]+A.nz*width],[b[0]+B.nx*nextWidth,b[2]+.035,b[1]+B.nz*nextWidth],[b[0]-B.nx*nextWidth,b[2]+.035,b[1]-B.nz*nextWidth]],'#414d55');
+ if(!lead){strip(wide?-2.65:-2.05,wide?-2.52:-1.92,.075,'#f4f0df');strip(wide?2.52:1.92,wide?2.65:2.05,.075,'#f4f0df')}
+ if(Math.min(a[2],b[2])>.6){strip(-width-.15,width+.15,-.65,'#8b9796');for(let edge of [-width,width])face([[a[0]+A.nx*edge,a[2]-.65,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]-.65,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.02,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.02,a[1]+A.nz*edge]],'#a8b3ad')}
+ if(Math.max(a[2],b[2])>.35)for(let edge of [-width+.1,width-.1]){if(wide&&a[2]>HIGHWAY_Y-.4&&Math.hypot(a[0]+A.nx*edge,a[1]+A.nz*edge)<579.7)continue;strip(edge,edge+Math.sign(edge)*.12,.85,'#c2ccca');face([[a[0]+A.nx*edge,a[2]+.63,a[1]+A.nz*edge],[b[0]+B.nx*edge,b[2]+.63,b[1]+B.nz*edge],[b[0]+B.nx*edge,b[2]+.85,b[1]+B.nz*edge],[a[0]+A.nx*edge,a[2]+.85,a[1]+A.nz*edge]],'#aebcba');if(i%4===0)cube(a[0]+A.nx*edge,a[1]+A.nz*edge,.12,.12,.8,'#899b9b',0,a[2])}
  if(travel>nextArrow){nextArrow=travel+80;let mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2,my=(a[2]+b[2])/2+.08;face([[mx+A.dx*2,my,mz+A.dz*2],[mx-A.dx*.3+A.nx*.65,my,mz-A.dz*.3+A.nz*.65],[mx-A.dx*.3-A.nx*.65,my,mz-A.dz*.3-A.nz*.65]],'#f4f0df');face([[mx-A.dx*2+A.nx*.17,my,mz-A.dz*2+A.nz*.17],[mx+A.nx*.17,my,mz+A.nz*.17],[mx-A.nx*.17,my,mz-A.nz*.17],[mx-A.dx*2-A.nx*.17,my,mz-A.dz*2-A.nz*.17]],'#f4f0df')}
- if(i%12===0&&a[2]>2.5){cube(a[0],a[1],1.2,1.5,a[2]-.7,'#a6ada9');cube(a[0],a[1],5.3,1.4,.5,'#b4b9af',Math.atan2(A.dx,A.dz),a[2]-1.0)}
+ if(i%12===0&&a[2]>2.5){cube(a[0],a[1],1.2,1.5,a[2]-.7,'#a6ada9');cube(a[0],a[1],width*2-.1,1.4,.5,'#b4b9af',Math.atan2(A.dx,A.dz),a[2]-1.0)}
  }}}
 function freewayGores(){for(let side=0;side<4;side++)for(let type of ['entry','exit']){const center=side*Math.PI/2,sign=type==='entry'?-1:1;let aa=center+sign*.18,bb=center+sign*.22,y=HIGHWAY_Y+.09;
  face([[577.15*Math.cos(aa),y,577.15*Math.sin(aa)],[577.9*Math.cos(aa),y,577.9*Math.sin(aa)],[577.15*Math.cos(bb),y,577.15*Math.sin(bb)]],'#65716c');
