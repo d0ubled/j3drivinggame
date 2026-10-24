@@ -258,7 +258,15 @@ function updateHorn(){if(!audio)return;if(!hornVoices){hornVoices=[350,440].map(
 let thirdPerson=false,frameRig=null;
 function makeCameraRig(){let heading=frameViewAngle===null?getViewAngle():frameViewAngle,look=roadSurface(x+Math.sin(heading)*3,z+Math.cos(heading)*3,groundY),grade=look===undefined?0:Math.atan2(look-groundY,3);return thirdPerson?{x:x-Math.sin(heading)*9.5,z:z-Math.cos(heading)*9.5,height:groundY+5.6,pitch:.28-grade,heading}:{x,z,height:groundY+1.45,pitch:-grade,heading}}
 function toggleView(){thirdPerson=!thirdPerson;frameRig=null;frameViewAngle=null;$('viewToggle').textContent=thirdPerson?'View: Behind (V)':'View: Cockpit (V)';$('viewToggle').setAttribute('aria-pressed',String(thirdPerson));say(thirdPerson?'Third-person view · behind and above your car':'Cockpit view',2)}
-function thirdPersonHUD(){const w=260,left=W/2-w/2,top=H-125;c.fillStyle='#102b35e8';c.fillRect(left,top,w,62);c.textAlign='center';c.fillStyle='#f0f6ef';c.font='bold 24px Arial';c.fillText(Math.round(Math.abs(speed)*2.237)+' MPH',W/2,top+27);c.fillStyle='#b8ef9a';c.font='12px Arial';c.fillText('THIRD PERSON · '+(park?'PARKED':gear<0?'REVERSE':'DRIVE')+' · V TO SWITCH',W/2,top+48)}
+function thirdPersonHUD(){
+ const side=thirdPerson,w=side?Math.min(210,W*.42):260,left=side?(W<=650?16:30):W/2-w/2;
+ const mission=document.querySelector?.('.mission'),missionBottom=mission?.getBoundingClientRect?.().bottom??(W<=650?245:280);
+ const top=side?Math.min(missionBottom+12,H-155):H-125;
+ c.save();c.fillStyle='#102b35e8';c.fillRect(left,top,w,62);
+ c.textAlign=side?'left':'center';const tx=side?left+12:left+w/2;
+ c.fillStyle='#f0f6ef';c.font='bold 24px Arial';c.fillText(Math.round(Math.abs(speed)*2.237)+' MPH',tx,top+27,w-24);
+ c.fillStyle='#b8ef9a';c.font='12px Arial';c.fillText((park?'PARKED':gear<0?'REVERSE':'DRIVE')+' · '+(side?'Chase':'Cockpit')+' (V)',tx,top+48,w-24);c.restore();
+}
 
 $('viewToggle').onclick=toggleView;graphics=initGraphics();reset();requestAnimationFrame(frame);
 </script></body></html>
