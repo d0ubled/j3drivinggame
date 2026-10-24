@@ -111,6 +111,23 @@ export function createRenderer(overlay) {
   sign.position.set(a,3.6,b-11.71);sign.rotation.y=Math.PI;scene.add(sign);
  }
 
+ 
+ // Overhead exit signs sit six meters above the deck, with supports outside the lanes.
+ const gantryMetal=new THREE.MeshStandardMaterial({color:'#879391',metalness:.65,roughness:.43});
+ const concreteMaterial=new THREE.MeshStandardMaterial({color:'#a9ada4',roughness:.9});
+ for(let side=0;side<4;side++){
+  const theta=side*Math.PI/2-.31,gantry=new THREE.Group();
+  gantry.name='exit-gantry-'+side;gantry.position.set(560*Math.cos(theta),7.2,560*Math.sin(theta));gantry.rotation.y=-theta;scene.add(gantry);
+  for(const xx of [-20.8,20.8]){block(gantry,concreteMaterial,xx,.35,0,1.1,.7,1.3);block(gantry,gantryMetal,xx,3.5,0,.28,7,.28)}
+  block(gantry,gantryMetal,0,6.7,0,42,.24,.25);block(gantry,gantryMetal,0,7.3,0,42,.16,.18);
+  for(let xx=-20;xx<20;xx+=3){const brace=block(gantry,gantryMetal,xx+1.5,7,0,3.1,.09,.09);brace.rotation.z=.19}
+  const names=['PALM AVENUE','COASTAL DISTRICT','MARKET STREET','PARK DISTRICT'];
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(9,2.5),signTexture('EXIT '+(side+1),names[side]+'   ↗','#1d654d'));
+  sign.position.set(12,6.5,-.18);sign.rotation.y=Math.PI;gantry.add(sign);
+  const through=new THREE.Mesh(new THREE.PlaneGeometry(6,2),signTexture('CITY LOOP','THROUGH TRAFFIC  ↓','#225d4d'));
+  through.position.set(3,6.5,-.18);through.rotation.y=Math.PI;gantry.add(through);
+ }
+
  const cars=[],queue=[];let carIndex=0;
  function newCar(col){
   const root=new THREE.Group(),paint=new THREE.MeshPhysicalMaterial({color:col,metalness:.45,roughness:.29,clearcoat:1,clearcoatRoughness:.15});scene.add(root);
