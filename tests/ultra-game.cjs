@@ -16,3 +16,21 @@ for(const p of [[2.2,-65],[162.3,20],[-162.3,-160]]){x=p[0];z=p[1];groundY=0;sta
 cube=savedCube;
 `,env);
 console.log('PASS: four facade families, varied skyline heights, city scene rebuilds, and planters clear of travel lanes.');
+
+vm.runInContext(`
+reset();traffic.length=0;lotVisitors.length=0;speed=0;
+for(const kind of Object.keys(vehicleSpecs)){
+ if(!selectVehicle(kind))throw Error('Cannot select '+kind);
+ if(!clearFootprint(x,z,yaw))throw Error('Selected vehicle does not fit');
+ const rig=makeCameraRig();thirdPerson=false;
+ if(Math.abs(makeCameraRig().height-groundY-vehicleSpec().eye)>.001)throw Error('Vehicle eye height');
+ thirdPerson=true;draw();thirdPerson=false;
+}
+speed=10;if(selectVehicle('bus'))throw Error('Vehicle changed while moving');speed=0;
+vehicleType='car';x=8;z=-65;if(selectVehicle('bus'))throw Error('Oversize vehicle accepted at curb');
+reset();vehicleType='car';
+for(let a=-360;a<=360;a+=120)for(let b=-360;b<=360;b+=120){x=a;z=b;staticKey='';draw()}
+let count=0;for(const [key,site]of treeSiteCache){if(!site)continue;const scale=Number(key.split(',')[2]);if(!treeSiteSafe(site[0],site[1],scale))throw Error('Unsafe tree placement');count++}
+if(count<10)throw Error('Tree filtering removed all landscaping');
+`,env);
+console.log('PASS: five selectable vehicles, safe switching, vehicle camera heights, and clearance audit of every generated tree site.');
