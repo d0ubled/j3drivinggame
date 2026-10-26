@@ -83,3 +83,15 @@ Development browser launch was rejected by the environment's automatic approval 
 ## City and freeway detail update
 
 Ultra now replaces the uniform building blocks with four facade families, a taller central district, glazed storefronts, window mullions, parapets, roof pavilions and planters. Added freeway details include longitudinal bridge girders, overhead exit gantries on all four sides, median lighting, pavement expansion joints and barrier reflectors. Reflectors respect existing ramp openings; sign supports and planters stay outside travel lanes. Road geometry and Classic are unchanged.
+
+## Vehicle selection and tree clearance
+
+Choose Car, Motorcycle, Bus, Pickup truck or Minivan on the start screen or using the Vehicle selector. Stop before switching. A switch is rejected if the new vehicle would extend off the drivable surface or overlap traffic/parked vehicles on the same road level. Press V to see the complete model.
+
+Each choice has its own model, color, dimensions, acceleration, steering wheelbase and eye height. Bus and pickup models have raised driving views; the motorcycle has handlebars in first person and a seated rider in third person. Models retain rotating wheels, brake lights and turn signals. The original forward-speed cap remains unchanged.
+
+Every tree-placement request now goes through a deterministic clearance check for the entire canopy around streets, sidewalks, the lot, building footprints, the freeway and all ramps. Conflicting trees are moved to a nearby clear location or omitted. Orphan trunks from the older scenery loop have been removed.
+
+The digital instrument texture is corrected for Ultra's mirrored scene coordinates, and speed/gear use separate fixed fields. The supplemental speed/gear HUD sits at the left edge in both camera modes.
+
+Automated checks cover five model builds, safe selection, vehicle eye heights, generated-tree clearance and dashboard text orientation. A browser visual playtest is still required.
