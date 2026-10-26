@@ -41,3 +41,17 @@ for(let side=0;side<4;side++){
  }
 }
 console.log('PASS: four exit gantries, sign clearance above five meters, support columns outside travel lanes.');
+
+const instrument=out.scene.getObjectByName('cockpit-instruments');
+out.scene.updateMatrixWorld(true);
+const pos=instrument.geometry.attributes.position,uv=instrument.geometry.attributes.uv;
+const ends=[];
+for(let i=0;i<pos.count;i++)ends.push({u:uv.getX(i),p:new Real.Vector3().fromBufferAttribute(pos,i).applyMatrix4(instrument.matrixWorld).project(out.camera)});
+const leftText=ends.filter(p=>p.u===0).reduce((s,p)=>s+p.p.x,0),rightText=ends.filter(p=>p.u===1).reduce((s,p)=>s+p.p.x,0);
+if(leftText>=rightText)throw Error('Dashboard text is mirrored');
+for(const kind of ['car','motorcycle','bus','truck','minivan']){
+ out.beginFrame();out.car(0,10,0,'#97c9c0',true,1,0,kind);
+ out.render(faces,{rig:{x:0,z:0,height:5.6,heading:0,pitch:.28},width:1280,height:800,focal:491,time:1,player:{x:0,z:10,groundY:0,yaw:0,speed:3,steering:0,gear:1,park:false,signal:1,thirdPerson:true,vehicleType:kind,eye:1.45}});
+ if(!env.window.__ultraDiagnostics.ready)throw Error('Vehicle model failed');
+}
+console.log('PASS: readable dashboard UV orientation and all five vehicle models through instanced rendering.');
