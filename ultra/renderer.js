@@ -155,9 +155,80 @@ export function createRenderer(overlay) {
    for(const z of [-2.15,2.15])block(root,side<0?left:right,side*.81,.76,z,.10,.13,.045);
   }
   block(root,plateMaterial,0,.5,-2.15,.44,.13,.03);
-  return{root,paint,rear,left,right,wheels,last:null};
+  return{root,paint,front,rear,left,right,wheels,last:null};
  }
  
+ 
+ const roundGeo=new THREE.SphereGeometry(1,16,10);
+ function newVehicle(kind,col){
+  const v=newCar(col);v.kind=kind;if(kind==='car')return v;
+  v.root.clear();v.wheels.length=0;
+  const root=v.root,paint=v.paint;
+  function panel(mat,x,y,z,w,h,d){return block(root,mat,x,y,z,w,h,d)}
+  function oval(mat,x,y,z,w,h,d){const m=new THREE.Mesh(roundGeo,mat);m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;root.add(m);return m}
+  function wheel(x,z,radius=.4){const p=new THREE.Group();p.position.set(x,radius+.04,z);root.add(p);const tire=new THREE.Mesh(wheelGeo,rubber),rim=new THREE.Mesh(rimGeo,chrome);for(const m of [tire,rim]){m.rotation.z=Math.PI/2;m.scale.set(radius/.35,1,radius/.35);m.castShadow=true;p.add(m)}v.wheels.push(p)}
+  const front=v.front;
+  let length=kind==='bus'?9.8:kind==='truck'?5.8:kind==='minivan'?5.1:2.3;
+  if(kind==='motorcycle'){
+   wheel(0,-.78,.36);wheel(0,.78,.36);
+   panel(chrome,0,.62,0,.16,.16,1.65);panel(trim,0,.57,-.1,.44,.42,.6);
+   oval(paint,0,.95,.16,.29,.26,.43);panel(trim,0,1.02,-.44,.42,.12,.6);
+   for(const side of [-1,1]){const fork=panel(chrome,side*.12,.75,.68,.045,.9,.045);fork.rotation.x=-.18;panel(chrome,side*.30,.52,-.55,.10,.1,.75)}
+   panel(chrome,0,1.23,.63,.72,.045,.045);
+   for(const side of [-1,1])panel(trim,side*.31,1.23,.63,.16,.065,.08);
+   panel(glassMaterial,0,1.36,.67,.40,.32,.055);
+   panel(front,0,1.04,1.02,.25,.16,.05);
+   panel(v.rear,0,.94,-1.06,.20,.13,.05);
+   for(const side of [-1,1])for(const z of [-1,1])panel(side<0?v.left:v.right,side*.27,.94,z,.08,.08,.07);
+   // Seated rider gives the motorcycle a recognizable third-person silhouette.
+   oval(trim,0,1.35,-.37,.24,.38,.20);oval(paint,0,1.84,-.22,.19,.22,.20);
+   panel(glassMaterial,0,1.87,-.025,.27,.10,.035);
+   for(const side of [-1,1]){const arm=panel(trim,side*.22,1.35,.18,.11,.12,.68);arm.rotation.x=.18;panel(trim,side*.24,.84,-.25,.13,.55,.15)}
+   return v;
+  }
+  const w=kind==='bus'?2.45:kind==='truck'?2.12:1.98;
+  panel(paint,0,.77,0,w,.72,length-.16);panel(trim,0,.35,0,w-.16,.16,length-.3);
+  if(kind==='bus'){
+   panel(paint,0,2.02,0,w,1.85,length-.25);
+   panel(paint,0,3.0,0,w+.02,.16,length-.18);
+   panel(glassMaterial,0,2.15,4.79,2.14,1.25,.06);
+   for(const side of [-1,1]){
+    for(let z=-3.9;z<=3.9;z+=1.3)panel(glassMaterial,side*1.235,2.18,z,.035,1.12,1.1);
+    panel(chrome,side*1.24,1.43,0,.025,.07,9.2);
+   }
+   panel(trim,1.24,1.65,3.3,.035,2.1,1.05);for(const z of [3.03,3.57])panel(glassMaterial,1.265,1.72,z,.035,1.6,.43);
+   panel(paint,0,3.18,-1.3,1.5,.24,2.4);
+   for(const side of [-1,1])for(const z of [-3.2,3.25])wheel(side*1.11,z,.5);
+   panel(trim,0,2.91,4.81,1.9,.26,.06);
+  }else if(kind==='truck'){
+   panel(paint,0,1.62,.7,1.97,1.12,2.6);panel(glassMaterial,0,1.94,2.02,1.72,.73,.045);
+   panel(paint,0,2.22,.65,2.03,.12,2.6);
+   for(const side of [-1,1]){panel(glassMaterial,side*1.0,1.85,.75,.035,.66,1.95);panel(paint,side*.98,1.38,-1.9,.16,.55,1.6)}
+   panel(trim,0,1.12,-1.9,1.76,.10,1.6);panel(paint,0,1.4,-2.77,2.04,.57,.12);
+   panel(paint,0,1.2,2.43,2.04,.17,.72);
+   for(const side of [-1,1])for(const z of [-1.85,1.75])wheel(side*1.0,z,.46);
+  }else{
+   panel(paint,0,1.44,-.15,1.90,1.12,3.75);
+   panel(paint,0,2.04,-.15,1.94,.14,3.8);
+   panel(glassMaterial,0,1.68,1.75,1.68,.68,.055);
+   panel(glassMaterial,0,1.65,-2.07,1.65,.65,.055);
+   for(const side of [-1,1]){
+    for(const z of [-1.35,-.25,.87])panel(glassMaterial,side*.963,1.66,z,.035,.65,.96);
+    panel(chrome,side*.982,1.25,-.5,.02,.035,2.7);panel(chrome,side*.99,1.15,-.35,.025,.05,.24);
+   }
+   for(const side of [-1,1])for(const z of [-1.55,1.5])wheel(side*.94,z,.37);
+  }
+  const end=length/2-.015,lightY=kind==='bus'?1.0:.93;
+  panel(trim,0,.71,end,.9,.3,.045);panel(chrome,0,.48,end,w-.15,.09,.045);
+  for(const side of [-1,1]){
+   panel(front,side*w*.32,lightY,end,.42,.20,.04);
+   panel(v.rear,side*w*.35,lightY,-end,.28,.26,.04);
+   for(const z of [-end,end])panel(side<0?v.left:v.right,side*w*.43,lightY,z,.12,.16,.055);
+   panel(paint,side*(w/2+.07),kind==='bus'?2.2:1.7,kind==='bus'?4.25:1.35,.13,.22,.26);
+  }
+  panel(plateMaterial,0,.56,-end,.45,.15,.04);return v;
+ }
+
  // Batch vehicle parts by shared geometry/material so traffic does not require
  // a draw call for every wheel, lamp and body panel.
  const vehicleBatches=new Map(),vehiclePaint=new THREE.MeshPhysicalMaterial({color:0xffffff,metalness:.45,roughness:.29,clearcoat:1}),vehicleLight=new THREE.MeshBasicMaterial({color:0xffffff});
@@ -207,7 +278,13 @@ export function createRenderer(overlay) {
  block(steeringWheel,chrome,0,0,0,.43,.025,.025);block(steeringWheel,trim,0,-.10,0,.035,.20,.03);block(steeringWheel,trim,0,0,.01,.12,.08,.04);
  const screenCanvas=document.createElement('canvas');screenCanvas.width=512;screenCanvas.height=128;const screenCtx=screenCanvas.getContext('2d');
  const screenTexture=new THREE.CanvasTexture(screenCanvas);screenTexture.colorSpace=THREE.SRGBColorSpace;
- const screen=new THREE.Mesh(new THREE.PlaneGeometry(.68,.17),new THREE.MeshBasicMaterial({map:screenTexture}));screen.name='cockpit-instruments';screen.position.set(.12,1.005,.445);screen.rotation.y=Math.PI;cockpit.add(screen);
+ const screen=new THREE.Mesh(new THREE.PlaneGeometry(.68,.17),new THREE.MeshBasicMaterial({map:screenTexture}));screen.name='cockpit-instruments';screen.position.set(.12,1.005,.445);screen.rotation.y=Math.PI;const instrumentUV=screen.geometry.attributes.uv;for(let i=0;i<instrumentUV.count;i++)instrumentUV.setX(i,1-instrumentUV.getX(i));cockpit.add(screen);
+ 
+ const bikeCockpit=new THREE.Group();scene.add(bikeCockpit);
+ block(bikeCockpit,chrome,0,1.02,.68,.75,.045,.045);
+ for(const side of [-1,1]){block(bikeCockpit,trim,side*.32,1.02,.68,.18,.075,.09);block(bikeCockpit,chrome,side*.14,.82,.75,.035,.43,.035)}
+ const bikeScreen=new THREE.Mesh(screen.geometry.clone(),screen.material);bikeScreen.position.set(0,1.03,.79);bikeScreen.scale.set(.55,.75,1);bikeScreen.rotation.y=Math.PI;bikeCockpit.add(bikeScreen);
+
  const mirrorTarget=new THREE.WebGLRenderTarget(384,144),mirrorCamera=new THREE.PerspectiveCamera(65,384/144,.3,420);
  const mirror=new THREE.Mesh(new THREE.PlaneGeometry(.38,.14),new THREE.MeshBasicMaterial({map:mirrorTarget.texture}));
  mirror.position.set(.18,1.73,.70);mirror.rotation.y=Math.PI;cockpit.add(mirror);
@@ -221,7 +298,7 @@ export function createRenderer(overlay) {
  renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();document.getElementById('ultra-error').hidden=false});
  return{
   beginFrame(){queue.length=0},
-  car(a,b,r,col,braking,indicator,elevation){queue.push({a,b,r,col,braking,indicator,elevation})},
+  car(a,b,r,col,braking,indicator,elevation,kind='car'){queue.push({a,b,r,col,braking,indicator,elevation,kind})},
   render(faces,state){
    const {rig,width,height,focal,time,player}=state,setting=presets[quality];
    if(width!==lastW||height!==lastH||lastQuality!==quality){
@@ -239,7 +316,7 @@ export function createRenderer(overlay) {
    sun.position.set(targetX+100,player.groundY+160,targetZ+60);sun.target.position.set(targetX,player.groundY,targetZ);
    upload(faces);carIndex=0;
    for(const q of queue){
-    let car=cars[carIndex];if(!car)cars[carIndex]=car=newCar(q.col);carIndex++;
+    let car=cars[carIndex];if(!car||car.kind!==q.kind){if(car){scene.remove(car.root);for(const m of [car.paint,car.front,car.rear,car.left,car.right])m.dispose()}cars[carIndex]=car=newVehicle(q.kind,q.col)}carIndex++;
     car.root.visible=true;car.root.position.set(q.a,q.elevation,q.b);car.root.rotation.y=q.r;car.paint.color.set(q.col);
     car.rear.emissiveIntensity=q.braking?2.5:.25;const blink=Math.floor(time*3)%2===0;
     car.left.emissiveIntensity=blink&&(q.indicator===-1||q.indicator===2)?3:0;
@@ -248,9 +325,10 @@ export function createRenderer(overlay) {
    }
    for(let i=carIndex;i<cars.length;i++)cars[i].root.visible=false;
    instanceCars(carIndex);
-   cockpit.visible=!player.thirdPerson&&player.gear>0;cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
+   cockpit.visible=!player.thirdPerson&&player.gear>0&&player.vehicleType!=='motorcycle';cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY+(player.eye??1.45)-1.45,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
+   bikeCockpit.visible=!player.thirdPerson&&player.gear>0&&player.vehicleType==='motorcycle';bikeCockpit.position.set(player.x,player.groundY+(player.eye??1.5)-1.45,player.z);bikeCockpit.rotation.y=player.yaw+player.steering*.12;
    const hud=Math.round(Math.abs(player.speed)*2.237)+'   '+(player.park?'P':player.gear<0?'R':'D')+'   '+(player.signal<0?'◀':player.signal>0?'▶':'');
-   if(hud!==lastHud){screenCtx.fillStyle='#07131b';screenCtx.fillRect(0,0,512,128);screenCtx.fillStyle='#d8f3eb';screenCtx.font='bold 70px sans-serif';screenCtx.fillText(hud,20,85);screenCtx.fillStyle='#8aacb6';screenCtx.font='18px sans-serif';screenCtx.fillText('MPH     JASMINE / ULTRA',22,117);screenTexture.needsUpdate=true;lastHud=hud}
+   if(hud!==lastHud){screenCtx.fillStyle='#07131b';screenCtx.fillRect(0,0,512,128);screenCtx.textAlign='left';screenCtx.fillStyle='#d8f3eb';screenCtx.font='bold 68px sans-serif';screenCtx.fillText(String(Math.round(Math.abs(player.speed)*2.237)),24,80);screenCtx.font='20px sans-serif';screenCtx.fillText('MPH',28,111);screenCtx.fillStyle='#b8ef9a';screenCtx.font='bold 52px sans-serif';screenCtx.fillText(player.park?'P':player.gear<0?'R':'D',330,76);screenCtx.font='16px sans-serif';screenCtx.fillText(player.park?'PARK':player.gear<0?'REVERSE':'DRIVE',310,109);screenTexture.needsUpdate=true;lastHud=hud}
    mirror.visible=quality!=='low';if(cockpit.visible&&mirror.visible&&mirrorFrame++%(quality==='high'?2:4)===0){
     mirrorCamera.position.set(player.x,player.groundY+1.65,-player.z);
     mirrorCamera.lookAt(player.x-Math.sin(player.yaw),player.groundY+1.60,-player.z+Math.cos(player.yaw));
