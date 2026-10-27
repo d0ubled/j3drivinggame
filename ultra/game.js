@@ -399,7 +399,7 @@ function drawNeighborhoods(){for(const n of neighborhoods){
  }for(const [i,h]of homes.entries()){
  const front=h.z+h.front*8,end=h.z+h.front*20;
  rect(h.x-3,h.x+3,Math.min(front,end),Math.max(front,end),'#bbb8a9',.07);
- const col=['#d3bfa4','#aabbb1','#d3c6b7','#b8b6c1'][i%4],height=i%3===0?6.2:3.7;
+ const col=i===19?'#318fa8':['#d3bfa4','#aabbb1','#d3c6b7','#b8b6c1'][i%4],height=i%3===0?6.2:3.7;
  cube(h.x,h.z,14,14,height,col);cube(h.x,h.z,14.8,14.8,.18,'#e4ddc9',0,height);
  face([[h.x-7.7,height,h.z-7.7],[h.x+7.7,height,h.z-7.7],[h.x+7.7,height+2.6,h.z],[h.x-7.7,height+2.6,h.z]],'#736257');
  face([[h.x-7.7,height,h.z+7.7],[h.x-7.7,height+2.6,h.z],[h.x+7.7,height+2.6,h.z],[h.x+7.7,height,h.z+7.7]],'#63574f');
