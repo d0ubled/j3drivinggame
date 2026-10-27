@@ -95,3 +95,17 @@ Every tree-placement request now goes through a deterministic clearance check fo
 The digital instrument texture is corrected for Ultra's mirrored scene coordinates, and speed/gear use separate fixed fields. The supplemental speed/gear HUD sits at the left edge in both camera modes.
 
 Automated checks cover five model builds, safe selection, vehicle eye heights, generated-tree clearance and dashboard text orientation. A browser visual playtest is still required.
+
+
+## Neighborhoods, home, walking, and mixed traffic
+
+Ultra has two residential blocks: Palm Grove (northwest) and Sunset Park (southeast). Their two-way local streets connect to the city grid on all four sides. There are 32 houses with pitched roofs, garages, driveways, porches, and windows. The HOME marker identifies your house in Sunset Park; its front door is teal with a gold panel.
+
+- Stop at ground level and press G to leave your selected vehicle. G returns when you are close to it; press P afterward to release the parking brake. Vehicle switching is disabled on foot.
+- W/S or Up/Down walk; A/D or Left/Right turn; Shift runs outdoors. Walking is first-person. Buildings and interior furniture block movement.
+- Press F at your home door to enter. Approach an object and press F to toggle the TV or lights, sit on the sofa (F again to stand), rest in bed, or get a snack. Rest and food replenish the displayed energy. Press F at the inside front door to leave. Other houses are exterior scenery.
+- Your vehicle remains parked outside. Driving traffic continues while you walk outdoors and pauses while you are inside. Restart returns to driving. House activities are session-local, not saved between reloads.
+- City and freeway traffic include cars, motorcycles, minivans, pickups, and buses. Long vehicles have larger following distances and stop farther back at red lights. Buses cruise up to 30 mph on streets and 60 mph on the freeway, subject to traffic.
+- 32 animated pedestrians walk back and forth on residential sidewalks, stop near the player or parked vehicle, and stay out of the road intersections. Hitting a pedestrian ends the drive; traffic can also hit you while you are on foot.
+
+Pedestrians use a reusable instanced mesh, preserving cached city geometry. Automated tests cover neighborhood road and driveway continuity, home access, all interactions, pedestrian route clearance, mixed fleet membership, following distance, walking-camera visibility, and renderer geometry. GPU rendering and visual appearance still need a browser playtest. Classic is unchanged.

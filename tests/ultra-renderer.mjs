@@ -55,3 +55,11 @@ for(const kind of ['car','motorcycle','bus','truck','minivan']){
  if(!env.window.__ultraDiagnostics.ready)throw Error('Vehicle model failed');
 }
 console.log('PASS: readable dashboard UV orientation and all five vehicle models through instanced rendering.');
+
+const walkState={rig:{x:0,z:0,height:1.65,heading:0,pitch:0},width:1280,height:800,focal:491,time:1,pedestrians:Array.from({length:32},(_,id)=>({id,x:id,z:10,a:0,phase:id})),player:{x:0,z:0,groundY:0,yaw:0,speed:0,steering:0,gear:1,park:true,signal:0,thirdPerson:false,onFoot:true,vehicleType:'car'}};
+out.beginFrame();out.render(faces,walkState);
+if(out.scene.getObjectByName('pedestrians').count!==256)throw Error('Pedestrian instance count');
+if(out.scene.getObjectByName('cockpit-instruments').parent.visible)throw Error('Cockpit blocks walking view');
+walkState.player.insideHome=true;out.render(faces,walkState);
+if(out.scene.getObjectByName('pedestrians').count!==0)throw Error('Pedestrians visible indoors');
+console.log('PASS: 32 animated pedestrian instance models, clear walking camera, and pedestrians hidden indoors.');

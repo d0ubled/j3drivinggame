@@ -104,9 +104,21 @@ export function createRenderer(overlay) {
   const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;
   return new THREE.MeshStandardMaterial({map:tex,roughness:.72});
  }
+
+ // Pedestrians use one reusable instance batch, independent of cached city geometry.
+ const people=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({roughness:.85}),256);
+ people.name='pedestrians';people.count=0;people.castShadow=true;people.frustumCulled=false;scene.add(people);
+ const personMatrix=new THREE.Object3D(),personColor=new THREE.Color();
+ function updatePeople(poses){let count=0;for(const p of poses.slice(0,32)){
+  const color=['#4b7194','#bd7455','#60836a','#9b6683'][p.id%4];
+  function part(dx,dz,y,w,l,h,col){personMatrix.position.set(p.x+dx*Math.cos(p.a)+dz*Math.sin(p.a),y,p.z-dx*Math.sin(p.a)+dz*Math.cos(p.a));personMatrix.rotation.set(0,p.a,0);personMatrix.scale.set(w,h,l);personMatrix.updateMatrix();people.setMatrixAt(count,personMatrix.matrix);people.setColorAt(count++,personColor.set(col))}
+  part(0,0,1.12,.45,.27,.6,color);part(0,0,1.6,.25,.25,.29,'#c99c7b');
+  for(const side of [-1,1]){const step=Math.sin(p.phase)*.17*side;part(side*.13,step,.47,.15,.18,.65,'#344650');part(side*.13,step+.05,.09,.18,.3,.16,'#253238');part(side*.31,-step,1.08,.12,.16,.55,color)}
+ }people.count=count;people.instanceMatrix.needsUpdate=true;if(people.instanceColor)people.instanceColor.needsUpdate=true;}
+
  const shops=[signTexture('COASTAL','COFFEE & BAKERY','#385653'),signTexture('PALM MARKET','FRESH • LOCAL','#62704b'),signTexture('STUDIO 05','DESIGN & PRINT','#776759')];
  for(let a=-300;a<340;a+=80)for(let b=-300;b<340;b+=80){
-  if(a>10&&a<105&&b>15&&b<130)continue;
+  if((a>10&&a<105&&b>15&&b<130)||(Math.abs(a+240)<80&&Math.abs(b-240)<80)||(Math.abs(a-240)<80&&Math.abs(b+240)<80))continue;
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.5,1.8),shops[Math.abs(a+b)%3]);
   sign.position.set(a,3.6,b-11.71);sign.rotation.y=Math.PI;scene.add(sign);
  }
@@ -314,6 +326,7 @@ export function createRenderer(overlay) {
    sky.position.set(rig.x,rig.height,rig.z);
    const targetX=Math.round(player.x/4)*4,targetZ=Math.round(player.z/4)*4;
    sun.position.set(targetX+100,player.groundY+160,targetZ+60);sun.target.position.set(targetX,player.groundY,targetZ);
+   updatePeople(player.insideHome?[]:(state.pedestrians||[]));
    upload(faces);carIndex=0;
    for(const q of queue){
     let car=cars[carIndex];if(!car||car.kind!==q.kind){if(car){scene.remove(car.root);for(const m of [car.paint,car.front,car.rear,car.left,car.right])m.dispose()}cars[carIndex]=car=newVehicle(q.kind,q.col)}carIndex++;
@@ -325,8 +338,8 @@ export function createRenderer(overlay) {
    }
    for(let i=carIndex;i<cars.length;i++)cars[i].root.visible=false;
    instanceCars(carIndex);
-   cockpit.visible=!player.thirdPerson&&player.gear>0&&player.vehicleType!=='motorcycle';cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY+(player.eye??1.45)-1.45,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
-   bikeCockpit.visible=!player.thirdPerson&&player.gear>0&&player.vehicleType==='motorcycle';bikeCockpit.position.set(player.x,player.groundY+(player.eye??1.5)-1.45,player.z);bikeCockpit.rotation.y=player.yaw+player.steering*.12;
+   cockpit.visible=!player.onFoot&&!player.thirdPerson&&player.gear>0&&player.vehicleType!=='motorcycle';cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY+(player.eye??1.45)-1.45,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
+   bikeCockpit.visible=!player.onFoot&&!player.thirdPerson&&player.gear>0&&player.vehicleType==='motorcycle';bikeCockpit.position.set(player.x,player.groundY+(player.eye??1.5)-1.45,player.z);bikeCockpit.rotation.y=player.yaw+player.steering*.12;
    const hud=Math.round(Math.abs(player.speed)*2.237)+'   '+(player.park?'P':player.gear<0?'R':'D')+'   '+(player.signal<0?'◀':player.signal>0?'▶':'');
    if(hud!==lastHud){screenCtx.fillStyle='#07131b';screenCtx.fillRect(0,0,512,128);screenCtx.textAlign='left';screenCtx.fillStyle='#d8f3eb';screenCtx.font='bold 68px sans-serif';screenCtx.fillText(String(Math.round(Math.abs(player.speed)*2.237)),24,80);screenCtx.font='20px sans-serif';screenCtx.fillText('MPH',28,111);screenCtx.fillStyle='#b8ef9a';screenCtx.font='bold 52px sans-serif';screenCtx.fillText(player.park?'P':player.gear<0?'R':'D',330,76);screenCtx.font='16px sans-serif';screenCtx.fillText(player.park?'PARK':player.gear<0?'REVERSE':'DRIVE',310,109);screenTexture.needsUpdate=true;lastHud=hud}
    mirror.visible=quality!=='low';if(cockpit.visible&&mirror.visible&&mirrorFrame++%(quality==='high'?2:4)===0){
@@ -340,3 +353,4 @@ export function createRenderer(overlay) {
   renderer,scene,camera
  };
 }
+
