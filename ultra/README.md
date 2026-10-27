@@ -109,3 +109,11 @@ Ultra has two residential blocks: Palm Grove (northwest) and Sunset Park (southe
 - 32 animated pedestrians walk back and forth on residential sidewalks, stop near the player or parked vehicle, and stay out of the road intersections. Hitting a pedestrian ends the drive; traffic can also hit you while you are on foot.
 
 Pedestrians use a reusable instanced mesh, preserving cached city geometry. Automated tests cover neighborhood road and driveway continuity, home access, all interactions, pedestrian route clearance, mixed fleet membership, following distance, walking-camera visibility, and renderer geometry. GPU rendering and visual appearance still need a browser playtest. Classic is unchanged.
+
+## Pedestrian and home presentation update
+
+Pedestrians now use rounded body parts, facial features, hair, varied skin and clothing colors, articulated knees and elbows, and a synchronized arm/leg gait. The 32 people share a single reusable instanced sphere mesh (736 parts) so their animation does not rebuild city geometry.
+
+The house now renders in a separate furnished scene with warm switchable ceiling lighting and cool window light. Details include staggered oak floorboards, baseboards, door panels, curtains and windowsills, a woven rug, rounded upholstery and pillows, layered bedding, cabinet fronts and handles, tiled backsplash, sink/faucet, fruit bowl, mug, wall art and small plants. The TV displays a coastal picture when switched on. Furniture stays within the existing interaction/collision areas, and the sofa faces the TV.
+
+Checks cover real Three.js geometry, finite buffers, pedestrian animation, interior objects, TV/light state combinations and returning outdoors. Browser/GPU visual verification remains outstanding; no measured frame-rate claim is made.

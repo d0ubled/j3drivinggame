@@ -58,8 +58,21 @@ console.log('PASS: readable dashboard UV orientation and all five vehicle models
 
 const walkState={rig:{x:0,z:0,height:1.65,heading:0,pitch:0},width:1280,height:800,focal:491,time:1,pedestrians:Array.from({length:32},(_,id)=>({id,x:id,z:10,a:0,phase:id})),player:{x:0,z:0,groundY:0,yaw:0,speed:0,steering:0,gear:1,park:true,signal:0,thirdPerson:false,onFoot:true,vehicleType:'car'}};
 out.beginFrame();out.render(faces,walkState);
-if(out.scene.getObjectByName('pedestrians').count!==256)throw Error('Pedestrian instance count');
+if(out.scene.getObjectByName('pedestrians').count!==736)throw Error('Pedestrian instance count');
 if(out.scene.getObjectByName('cockpit-instruments').parent.visible)throw Error('Cockpit blocks walking view');
 walkState.player.insideHome=true;out.render(faces,walkState);
 if(out.scene.getObjectByName('pedestrians').count!==0)throw Error('Pedestrians visible indoors');
 console.log('PASS: 32 animated pedestrian instance models, clear walking camera, and pedestrians hidden indoors.');
+
+for(const lights of [false,true])for(const tv of [false,true]){
+ walkState.player.homeLights=lights;walkState.player.homeTV=tv;out.render(faces,walkState);
+ if(out.homeScene.getObjectByName('television-picture').visible!==tv)throw Error('TV state not rendered');
+ if(!env.window.__ultraDiagnostics.insideHome)throw Error('Interior scene not used');
+ for(const name of ['seat-cushion','bed-pillow','sink-basin','window-sill','oak-floorboard'])if(!out.homeScene.getObjectByName(name))throw Error('Interior detail missing '+name);
+}
+walkState.player.insideHome=false;out.render(faces,walkState);
+if(env.window.__ultraDiagnostics.insideHome)throw Error('Failed return outdoors');
+const people=out.scene.getObjectByName('pedestrians'),oldPose=people.instanceMatrix.array.slice();
+walkState.pedestrians.forEach(p=>p.phase+=.7);out.render(faces,walkState);
+if(!people.instanceMatrix.array.some((v,i)=>Math.abs(v-oldPose[i])>.001))throw Error('Articulated gait not animated');
+console.log('PASS: detailed interior geometry, all light/TV states, return outdoors and articulated pedestrian animation.');
