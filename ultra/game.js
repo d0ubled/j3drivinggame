@@ -149,7 +149,7 @@ function drawWorld(){
 for(let rx of roads)for(let rz of roads){rect(rx+.2,rx+7.7,rz-12,rz-11.65,'#eee8d8',.065);rect(rx-7.7,rx-.2,rz+11.65,rz+12,'#eee8d8',.065);rect(rx-12,rx-11.65,rz-7.7,rz-.2,'#eee8d8',.065);rect(rx+11.65,rx+12,rz+.2,rz+7.7,'#eee8d8',.065);for(let k=-7;k<8;k+=2){rect(rx+k,rx+k+1,rz-11,rz-9,'#dddcca',.06);rect(rx+k,rx+k+1,rz+9,rz+11,'#dddcca',.06);rect(rx-11,rx-9,rz+k,rz+k+1,'#dddcca',.06);rect(rx+9,rx+11,rz+k,rz+k+1,'#dddcca',.06)}for(let side of [-1,1]){signalHead(rx,rz,side,'z');signalHead(rx,rz,side,'x')}}
 
 ultraBuildings();for(let a=-300;a<=340;a+=30){if(roadDist(a)>18){tree(-11,a,1);tree(a,-11,1)}}
- streetDetails();ultraStreetDetails();drawNeighborhoods();drawFreeway();ultraFreewayDetails();staticFaces=faces;staticKey=key;
+ streetDetails();ultraStreetDetails();drawNeighborhoods();drawResidentialSidewalks();drawFreeway();ultraFreewayDetails();staticFaces=faces;staticKey=key;
  }
  faces=staticFaces;
  for(const v of traffic){const p=carPose(v.s,v.route);car(p.x,p.z,p.a,v.color,v.braking,reactiveIndicator(v,cityBlinker(v)),0,v.kind)}
@@ -435,3 +435,43 @@ function drawHomeInterior(){const wall=homeLights?'#d8ccb8':'#827d74';rect(-5,5,
 }
 
 function parkedFootOverlap(a,b){if(!parkedVehicle)return false;const p=parkedVehicle,s=vehicleSpecs[p.type],dx=a-p.x,dz=b-p.z;return Math.abs(dx*Math.cos(p.yaw)-dz*Math.sin(p.yaw))<s.width/2+.3&&Math.abs(dx*Math.sin(p.yaw)+dz*Math.cos(p.yaw))<s.length/2+.3}
+
+function drawResidentialSidewalks(){
+ const concrete='#d4cebd',joint='#aba89d';
+ for(const n of neighborhoods){
+  // Four-metre local sidewalks and a continuous outer pavement, with gaps for roads.
+  for(const side of [-1,1])for(const [lo,hi] of [[-72,-6],[6,72]]){
+   const a=side<0?-10:6,b=side<0?-6:10;
+   rect(n.x+a,n.x+b,n.z+lo,n.z+hi,concrete,.095);
+   rect(n.x+lo,n.x+hi,n.z+a,n.z+b,concrete,.095);
+   const oa=side<0?-72:69.5,ob=side<0?-69.5:72;
+   rect(n.x+oa,n.x+ob,n.z+lo,n.z+hi,concrete,.095);
+   rect(n.x+lo,n.x+hi,n.z+oa,n.z+ob,concrete,.095);
+   for(let q=lo+2;q<hi;q+=3){
+    rect(n.x+a,n.x+b,n.z+q,n.z+q+.035,joint,.10);
+    rect(n.x+q,n.x+q+.035,n.z+a,n.z+b,joint,.10);
+    rect(n.x+oa,n.x+ob,n.z+q,n.z+q+.035,joint,.10);
+    rect(n.x+q,n.x+q+.035,n.z+oa,n.z+ob,joint,.10);
+   }
+  }
+  // Curb segments stop at driveways and leave the pedestrian crossings flush.
+  for(const side of [-1,1])for(let q=-69;q<69;q+=2){
+   if(Math.abs(q)<14)continue;
+   for(const off of [side*6.1,side*71.9]){
+    if(![-1,0,1].some(d=>residentialDrive(n.x+off,n.z+q+d)))cube(n.x+off,n.z+q,.18,1.96,.13,'#b9b8aa',0,.035);
+    if(![-1,0,1].some(d=>residentialDrive(n.x+q+d,n.z+off)))cube(n.x+q,n.z+off,1.96,.18,.13,'#b9b8aa',0,.035);
+   }
+  }
+  for(const side of [-1,1])for(let q=-5.4;q<6;q+=1.8){
+   rect(n.x+q,n.x+q+.9,n.z+side*11-1,n.z+side*11+1,'#eee9d8',.08);
+   rect(n.x+side*11-1,n.x+side*11+1,n.z+q,n.z+q+.9,'#eee9d8',.08);
+  }
+ }
+ // Every front porch connects to its nearest sidewalk, including the player's home.
+ for(const h of homes){
+  const n=residentialDistrict(h.x,h.z),outer=Math.abs(h.z-n.z)>40;
+  const end=outer?n.z+Math.sign(h.z-n.z)*70.8:n.z+Math.sign(h.z-n.z)*8;
+  const start=h.z+h.front*8.4;
+  rect(h.x-4.9,h.x-3.1,Math.min(start,end),Math.max(start,end),concrete,.09);
+ }
+}
