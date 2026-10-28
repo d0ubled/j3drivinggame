@@ -1,6 +1,6 @@
 # Jasmine Drive Ultra
 
-[Play Ultra](../ultra.html) · [Play Classic](../classic.html)
+[Play Ultra](../ultra.html) � [Play Classic](../classic.html)
 
 Ultra is a separate graphics edition. The original game remains available in `classic.html`, with explicitly requested shared usability fixes; `index.html` remains the Classic entry point with a link to Ultra.
 
@@ -117,3 +117,18 @@ Pedestrians now use rounded body parts, facial features, hair, varied skin and c
 The house now renders in a separate furnished scene with warm switchable ceiling lighting and cool window light. Details include staggered oak floorboards, baseboards, door panels, curtains and windowsills, a woven rug, rounded upholstery and pillows, layered bedding, cabinet fronts and handles, tiled backsplash, sink/faucet, fruit bowl, mug, wall art and small plants. The TV displays a coastal picture when switched on. Furniture stays within the existing interaction/collision areas, and the sofa faces the TV.
 
 Checks cover real Three.js geometry, finite buffers, pedestrian animation, interior objects, TV/light state combinations and returning outdoors. Browser/GPU visual verification remains outstanding; no measured frame-rate claim is made.
+
+## Family home and school trips
+
+The home now has 160 square metres of floor space, with a separate adult bedroom and a children's room with bunk beds. Two fictional kids are visible at home, follow you outside, and ride in a vehicle with passenger seats.
+
+- At the kitchen, F picks up a visible apple. Carry it to the sofa, use F to sit, and B to eat. Eating takes a short animation and restores 20 energy; F stands up. A/D can turn your view while seated.
+- In YOUR ROOM, approach the bed and press F to lie down. The camera reclines and energy gradually recovers. F gets up beside the bed; it does not teleport you outside.
+- Press F near the kids by the front door to start the school trip. Walk outside, approach your parked vehicle, and press G to buckle everyone in. A motorcycle cannot carry both kids.
+- SCHOOL on the map marks Palm Elementary in the northeast block. Enter its driveway from the road to the south and park in the blue bay in front of the building. Stop, apply P, then press F to drop off.
+- A school day lasts 60 seconds of active play. You can drive elsewhere or visit home while class is running. The status text announces dismissal; return to the blue bay, park, and press F to pick up.
+- Drive HOME, press G to get out with the kids, and enter the front door with F to complete a school trip. You can start another trip from home. Pause freezes the school timer; restart resets the current trip. No family state is saved across page reloads.
+
+School grounds include two driveway connections, a marked passenger bay, sidewalk, school sign, classroom windows, entrance canopy, and playground. The school replaces the office buildings in that block. Classic is unchanged.
+
+Automated checks cover the complete school sequence, motorcycle rejection, safe drop-off and pickup, both driveways and the bay, bedroom access and collision bounds, snack/rest state changes, visible child models, held-snack animation state, and room geometry. Browser/GPU visual playtesting is still outstanding.

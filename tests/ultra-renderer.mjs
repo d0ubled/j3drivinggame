@@ -76,3 +76,17 @@ const people=out.scene.getObjectByName('pedestrians'),oldPose=people.instanceMat
 walkState.pedestrians.forEach(p=>p.phase+=.7);out.render(faces,walkState);
 if(!people.instanceMatrix.array.some((v,i)=>Math.abs(v-oldPose[i])>.001))throw Error('Articulated gait not animated');
 console.log('PASS: detailed interior geometry, all light/TV states, return outdoors and articulated pedestrian animation.');
+// Family models, held snack and resting body use the same renderer as normal play.
+walkState.player.insideHome=true;walkState.player.onFoot=true;walkState.player.homeSeated=true;walkState.player.heldSnack=true;walkState.player.family={poses:[{id:32,child:true,x:1.8,z:-2.4,a:0,phase:0},{id:33,child:true,x:2.6,z:-2.4,a:0,phase:0}]};
+out.render(faces,walkState);
+if(out.homeScene.getObjectByName('family-at-home').count!==48)throw Error('Kids not rendered');
+if(!out.homeScene.getObjectByName('held-snack').visible||!out.homeScene.getObjectByName('resting-body').visible)throw Error('Snack or seated body missing');
+for(const name of ['kids-bunk-frame','bedroom-divider','bedroom-window'])if(!out.homeScene.getObjectByName(name))throw Error('Expanded room detail missing');
+const bed=out.homeScene.getObjectByName('bed-frame');if(bed.position.z<7)throw Error('Adult bed not moved');
+walkState.player.homeSeated=false;walkState.player.homeLying=true;walkState.player.snackEatingUntil=1.8;out.render(faces,walkState);
+if(!out.homeScene.getObjectByName('resting-body').visible)throw Error('Reclined body missing');
+walkState.player.insideHome=false;walkState.player.onFoot=false;out.render(faces,walkState);
+if(out.scene.getObjectByName('held-snack').visible)throw Error('Snack blocks driving');
+if(out.scene.getObjectByName('pedestrians').count!==784)throw Error('Outdoor family passenger models missing');
+if(!out.scene.getObjectByName('school-sign'))throw Error('School label missing');
+console.log('PASS: held snack, resting body, child models indoors/outdoors, rear bedrooms and school signage.');

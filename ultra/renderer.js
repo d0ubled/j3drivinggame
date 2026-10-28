@@ -111,15 +111,15 @@ export function createRenderer(overlay) {
  people.name='pedestrians';people.count=0;people.castShadow=true;people.frustumCulled=false;scene.add(people);
  const personMatrix=new THREE.Object3D(),personColor=new THREE.Color(),personUp=new THREE.Vector3(0,1,0);
  const limbDirection=new THREE.Vector3();
- function updatePeople(poses){let count=0;for(const p of poses.slice(0,32)){
+ function updatePeople(poses,target=people){let count=0;for(const p of poses.slice(0,36)){
   const skin=['#c99c7b','#8b5b40','#e2b99c','#b8805e'][p.id%4],hair=['#332922','#493527','#221f1e','#856343'][p.id%4];
   const shirt=['#4b7194','#bd7455','#60836a','#9b6683','#c5b68d','#5d6578'][p.id%6],pants=p.id%3===0?'#535a64':'#293c50';
-  const size=.93+(p.id%5)*.035,cs=Math.cos(p.a),sn=Math.sin(p.a),bob=Math.cos(p.phase*2)*.012;
+  const size=p.child?.64:.93+(p.id%5)*.035,cs=Math.cos(p.a),sn=Math.sin(p.a),bob=Math.cos(p.phase*2)*.012;
   function part(dx,y,dz,w,h,l,col,rotation=null){
-   personMatrix.position.set(p.x+(dx*cs+dz*sn)*size,(y+bob)*size,p.z+(-dx*sn+dz*cs)*size);
+   personMatrix.position.set(p.x+(dx*cs+dz*sn)*size,(y+bob)*size+(p.y||0),p.z+(-dx*sn+dz*cs)*size);
    personMatrix.rotation.set(0,p.a,0);if(rotation)personMatrix.quaternion.multiply(rotation);
    personMatrix.scale.set(w*size,h*size,l*size);personMatrix.updateMatrix();
-   people.setMatrixAt(count,personMatrix.matrix);people.setColorAt(count++,personColor.set(col));
+   target.setMatrixAt(count,personMatrix.matrix);target.setColorAt(count++,personColor.set(col));
   }
   function limb(a,b,r,col){limbDirection.set(b[0]-a[0],b[1]-a[1],b[2]-a[2]);const len=limbDirection.length();const q=new THREE.Quaternion().setFromUnitVectors(personUp,limbDirection.normalize());part((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,r,len/2+r*.35,r,col,q)}
   part(0,1.15,0,.23,.31,.13,shirt);part(0,.88,0,.19,.13,.12,pants);
@@ -136,7 +136,7 @@ export function createRenderer(overlay) {
    const shoulder=[side*.24,1.35,0],elbow=[side*.27,1.1,-Math.sin(p.phase)*.15*side],hand=[side*.27,.9,elbow[2]+.06];
    limb(shoulder,elbow,.065,shirt);limb(elbow,hand,.045,skin);part(...[hand[0],hand[1],hand[2]],.048,.065,.038,skin);
   }
- }people.count=count;people.instanceMatrix.needsUpdate=true;if(people.instanceColor)people.instanceColor.needsUpdate=true;}
+ if(p.child)part(0,1.15,-.16,.18,.23,.09,p.id%2?'#db9d49':'#b15c6c');}target.count=count;target.instanceMatrix.needsUpdate=true;if(target.instanceColor)target.instanceColor.needsUpdate=true;}
 
  // A separate, furnished interior keeps outdoor fog and sunlight out of the room.
  const homeScene=new THREE.Scene();homeScene.scale.z=-1;homeScene.background=new THREE.Color('#c9d6d8');
@@ -173,13 +173,13 @@ export function createRenderer(overlay) {
  }
  function homeRound(name,x,y,z,r,h,mat){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r*.9,h,20),mat);m.name=name;m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;homeScene.add(m);return m}
  // Staggered individual floorboards, baseboards, ceiling and wall panels.
- homeBox('floor-underlay',0,-.08,0,10,.15,10,homeMat.walnut);
- for(let row=0;row<20;row++)for(let col=-1;col<5;col++){let left=Math.max(-5,-5+col*2.5+(row%2)*1.25),right=Math.min(5,-5+(col+1)*2.5+(row%2)*1.25);if(right>left)homeBox('oak-floorboard',(left+right)/2,.005,-4.75+row*.5,right-left-.012,.025,.488,homeMat.wood)}
+ homeBox('floor-underlay',0,-.08,3,10,.15,16,homeMat.walnut);
+ for(let row=0;row<32;row++)for(let col=-1;col<5;col++){let left=Math.max(-5,-5+col*2.5+(row%2)*1.25),right=Math.min(5,-5+(col+1)*2.5+(row%2)*1.25);if(right>left)homeBox('oak-floorboard',(left+right)/2,.005,-4.75+row*.5,right-left-.012,.025,.488,homeMat.wood)}
  for(const side of [-1,1]){
-  homeBox('side-wall',side*5,1.5,0,.15,3,10,homeMat.wall);homeBox('end-wall',0,1.5,side*5,10,3,.15,homeMat.wall);
-  homeBox('baseboard',side*4.9,.12,0,.09,.24,10,homeMat.trim);homeBox('baseboard',0,.12,side*4.9,10,.24,.09,homeMat.trim);
+  homeBox('side-wall',side*5,1.5,3,.15,3,16,homeMat.wall);homeBox('end-wall',0,1.5,side<0?-5:11,10,3,.15,homeMat.wall);
+  homeBox('baseboard',side*4.9,.12,3,.09,.24,16,homeMat.trim);homeBox('baseboard',0,.12,side<0?-4.9:10.9,10,.24,.09,homeMat.trim);
  }
- homeBox('ceiling',0,3.06,0,10,.12,10,homeMat.trim);
+ homeBox('ceiling',0,3.06,3,10,.12,16,homeMat.trim);
  homeBox('front-door',0,1.22,-4.88,1.5,2.44,.12,homeMat.walnut,.035);
  for(const a of [-.81,.81])homeBox('door-frame',a,1.25,-4.8,.12,2.5,.13,homeMat.trim);
  homeBox('door-frame',0,2.53,-4.8,1.74,.12,.13,homeMat.trim);
@@ -227,12 +227,12 @@ export function createRenderer(overlay) {
  const tvGlow=new THREE.PointLight('#8bbfdd',0,5,2);tvGlow.position.set(0,1.6,4.2);homeScene.add(tvGlow);
  homeBox('tv-stand',0,.85,4.6,.6,.07,.3,homeMat.dark,.02);
  // Layered bed linen, pillows and a headboard, within the existing collision footprint.
- homeBox('bed-frame',-3.4,.28,3.2,2.5,.46,3,homeMat.walnut,.07);
- homeBox('headboard',-3.4,.85,4.63,2.55,1.25,.15,homeMat.fabric,.06);
- homeBox('mattress',-3.4,.6,3.2,2.4,.3,2.9,homeMat.linen,.12);
- homeBox('duvet',-3.4,.79,2.9,2.42,.19,2.25,homeMat.blue,.09);
- for(const a of [-3.97,-2.83])homeBox('bed-pillow',a,.84,4.13,1,.18,.61,homeMat.linen,.08);
- for(let i=0;i<8;i++)homeBox('duvet-seam',-4.45+i*.3,.89,2.9,.012,.007,2.05,homeMat.linen);
+ homeBox('bed-frame',-3.4,.28,8.2,2.5,.46,3,homeMat.walnut,.07);
+ homeBox('headboard',-3.4,.85,9.63,2.55,1.25,.15,homeMat.fabric,.06);
+ homeBox('mattress',-3.4,.6,8.2,2.4,.3,2.9,homeMat.linen,.12);
+ homeBox('duvet',-3.4,.79,7.9,2.42,.19,2.25,homeMat.blue,.09);
+ for(const a of [-3.97,-2.83])homeBox('bed-pillow',a,.84,9.13,1,.18,.61,homeMat.linen,.08);
+ for(let i=0;i<8;i++)homeBox('duvet-seam',-4.45+i*.3,.89,7.9,.012,.007,2.05,homeMat.linen);
  // Kitchen cabinet fronts, backsplash tiles, sink, faucet and countertop objects.
  homeBox('kitchen-base',4.2,.52,3,1.3,1.04,3,homeMat.trim,.025);
  homeBox('countertop',4.2,1.09,3,1.5,.12,3.1,homeMat.stone,.035);
@@ -253,9 +253,47 @@ export function createRenderer(overlay) {
  homeBox('art-blue',2.78,1.9,-4.77,.55,.5,.015,homeMat.blue);
  homeBox('art-sand',3.12,1.65,-4.75,.46,.35,.015,homeMat.wood);
  for(const side of [-1,1]){homeRound('plant-pot',side*4.66,1.12,-1.4,.13,.23,homeMat.ceramic);for(let j=0;j<6;j++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(1,10,6),homeMat.leaf);leaf.scale.set(.055,.19,.035);leaf.position.set(side*4.66+Math.sin(j)*.08,1.4,-1.4+Math.cos(j)*.08);leaf.rotation.z=Math.sin(j)*.6;homeScene.add(leaf)}}
- const shops=[signTexture('COASTAL','COFFEE & BAKERY','#385653'),signTexture('PALM MARKET','FRESH • LOCAL','#62704b'),signTexture('STUDIO 05','DESIGN & PRINT','#776759')];
+ // Rear bedrooms extend the house from 100 to 160 square metres of floor space.
+ for(const [a,w] of [[-3.8,2.4],[0,2.8],[3.8,2.4]])homeBox('bedroom-front-wall',a,1.5,5,w,3,.16,homeMat.wall);
+ for(const a of [-2.65,-1.35,1.35,2.65])homeBox('bedroom-door-frame',a,1.25,4.9,.08,2.5,.12,homeMat.trim);
+ for(const a of [-2,2])homeBox('bedroom-door-header',a,2.56,5,1.3,.9,.16,homeMat.wall);
+ homeBox('bedroom-divider',0,1.5,8,.15,3,6,homeMat.wall);
+ const bedroomLight=new THREE.PointLight('#ffdfb0',25,11,2);bedroomLight.position.set(-2.5,2.6,8);homeScene.add(bedroomLight);
+ const kidsLight=new THREE.HemisphereLight('#e3eeff','#c4aa90',.65);homeScene.add(kidsLight);
+ for(const y of [.48,1.65]){
+  homeBox('kids-bunk-frame',3.4,y,8.5,2.1,.15,2.8,homeMat.wood,.04);
+  homeBox('kids-mattress',3.4,y+.16,8.5,1.96,.2,2.65,homeMat.linen,.08);
+  homeBox('kids-blanket',3.4,y+.3,8.2,1.98,.12,2,homeMat.blue,.05);
+  homeBox('kids-pillow',3.4,y+.32,9.45,1.15,.15,.55,homeMat.linen,.06);
+ }
+ for(const a of [2.4,4.4])for(const z of [7.1,9.9])homeBox('bunk-post',a,1.2,z,.1,2.4,.1,homeMat.wood,.02);
+ homeBox('bunk-guardrail',2.4,2.15,8.6,.08,.12,2.5,homeMat.wood);
+ for(const a of [2.5,3.05])homeBox('bunk-ladder',a,1.05,7.02,.08,2.1,.08,homeMat.wood);
+ for(let y=.25;y<2;y+=.3)homeBox('ladder-rung',2.775,y,7.02,.6,.06,.1,homeMat.wood);
+ homeBox('bedroom-window',-4.88,1.8,8.2,.08,1.5,2,windowMaterial);
+ homeBox('kids-window',4.88,1.8,8.2,.08,1.5,2,windowMaterial);
+ homeBox('kids-rug',2.2,.035,6.2,3.2,.03,1.5,homeMat.blue);
+ // Two smaller versions of the pedestrian model, with backpacks.
+ const homePeople=new THREE.InstancedMesh(people.geometry,people.material,64);homePeople.name='family-at-home';homePeople.count=0;homePeople.castShadow=true;homePeople.frustumCulled=false;homeScene.add(homePeople);
+ const heldSnack=new THREE.Group();heldSnack.name='held-snack';
+ const apple=new THREE.Mesh(new THREE.SphereGeometry(.065,18,12),new THREE.MeshStandardMaterial({color:'#b64031',roughness:.35}));apple.scale.y=1.1;heldSnack.add(apple);
+ const hand=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),new THREE.MeshStandardMaterial({color:'#c99c7b',roughness:.85}));hand.scale.set(.065,.035,.07);hand.position.set(0,-.05,0);heldSnack.add(hand);
+ const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(.045,.06,.23,12),homeMat.blue);sleeve.position.set(.015,-.13,-.07);sleeve.rotation.x=-.6;heldSnack.add(sleeve);
+ const stem=new THREE.Mesh(new THREE.CylinderGeometry(.006,.007,.035,8),homeMat.walnut);stem.position.y=.08;heldSnack.add(stem);
+ const heldPoint=new THREE.Vector3();
+ function updateHeldSnack(player,rig,time,indoors){const parent=indoors?homeScene:scene;if(heldSnack.parent!==parent)parent.add(heldSnack);heldSnack.visible=!!player.onFoot&&!!player.heldSnack;if(!heldSnack.visible)return;const eating=player.snackEatingUntil>time,progress=eating?Math.max(0,1-(player.snackEatingUntil-time)/.9):0,lift=eating?Math.sin(progress*Math.PI):0;camera.updateMatrixWorld(true);heldPoint.set(.26*(1-lift),-.32+.25*lift,-.56+.36*lift).applyMatrix4(camera.matrixWorld);heldSnack.position.set(heldPoint.x,heldPoint.y,-heldPoint.z);heldSnack.rotation.set(0,rig.heading,0);}
+ const restBody=new THREE.Group();restBody.name='resting-body';homeScene.add(restBody);
+ const restLegs=[];for(const side of [-1,1]){const leg=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),homeMat.blue);leg.scale.set(.1,.09,.34);leg.position.set(side*.13,.51,.35);restBody.add(leg);restLegs.push(leg);const shoe=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),homeMat.dark);shoe.scale.set(.10,.08,.17);shoe.position.set(side*.13,.3,.72);restBody.add(shoe)}
+ function updateRestBody(player){restBody.visible=!!(player.homeSeated||player.homeLying);restBody.position.set(player.x,player.homeLying?.3:0,player.z);restBody.rotation.y=player.yaw;}
+ const schoolSign=new THREE.Mesh(new THREE.PlaneGeometry(20,2.6),signTexture('PALM ELEMENTARY','DROP-OFF & PICKUP      BLUE BAY','#355d68'));schoolSign.name='school-sign';schoolSign.position.set(244,6,239.6);schoolSign.rotation.y=Math.PI;scene.add(schoolSign);
+ const schoolUV=schoolSign.geometry.attributes.uv;for(let i=0;i<schoolUV.count;i++)schoolUV.setX(i,1-schoolUV.getX(i));
+ const baySign=new THREE.Mesh(new THREE.PlaneGeometry(6,1.3),signTexture('KIDS HERE','STOP      P PARK      F','#377996'));baySign.position.set(258,2.2,234);baySign.rotation.y=Math.PI;scene.add(baySign);const bayUV=baySign.geometry.attributes.uv;for(let i=0;i<bayUV.count;i++)bayUV.setX(i,1-bayUV.getX(i));
+ for(const [a,title] of [[-2,'YOUR ROOM'],[2,'KIDS ROOM']]){const label=new THREE.Mesh(new THREE.PlaneGeometry(1.2,.4),signTexture(title,'BEDROOM','#476e76'));label.position.set(a,2.65,4.88);label.rotation.y=Math.PI;const uv=label.geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setX(i,1-uv.getX(i));homeScene.add(label)}
+
+
+ const shops=[signTexture('COASTAL','COFFEE & BAKERY','#385653'),signTexture('PALM MARKET','FRESH  LOCAL','#62704b'),signTexture('STUDIO 05','DESIGN & PRINT','#776759')];
  for(let a=-300;a<340;a+=80)for(let b=-300;b<340;b+=80){
-  if((a>10&&a<105&&b>15&&b<130)||(Math.abs(a+240)<80&&Math.abs(b-240)<80)||(Math.abs(a-240)<80&&Math.abs(b+240)<80))continue;
+  if((a>170&&a<310&&b>170&&b<310)||(a>10&&a<105&&b>15&&b<130)||(Math.abs(a+240)<80&&Math.abs(b-240)<80)||(Math.abs(a-240)<80&&Math.abs(b+240)<80))continue;
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.5,1.8),shops[Math.abs(a+b)%3]);
   sign.position.set(a,3.6,b-11.71);sign.rotation.y=Math.PI;scene.add(sign);
  }
@@ -271,9 +309,9 @@ export function createRenderer(overlay) {
   block(gantry,gantryMetal,0,6.7,0,42,.24,.25);block(gantry,gantryMetal,0,7.3,0,42,.16,.18);
   for(let xx=-20;xx<20;xx+=3){const brace=block(gantry,gantryMetal,xx+1.5,7,0,3.1,.09,.09);brace.rotation.z=.19}
   const names=['PALM AVENUE','COASTAL DISTRICT','MARKET STREET','PARK DISTRICT'];
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(9,2.5),signTexture('EXIT '+(side+1),names[side]+'   ↗','#1d654d'));
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(9,2.5),signTexture('EXIT '+(side+1),names[side]+'   ?','#1d654d'));
   sign.position.set(12,6.5,-.18);sign.rotation.y=Math.PI;gantry.add(sign);
-  const through=new THREE.Mesh(new THREE.PlaneGeometry(6,2),signTexture('CITY LOOP','THROUGH TRAFFIC  ↓','#225d4d'));
+  const through=new THREE.Mesh(new THREE.PlaneGeometry(6,2),signTexture('CITY LOOP','THROUGH TRAFFIC  ','#225d4d'));
   through.position.set(3,6.5,-.18);through.rotation.y=Math.PI;gantry.add(through);
  }
 
@@ -461,7 +499,7 @@ export function createRenderer(overlay) {
    camera.position.set(rig.x,rig.height,-rig.z);
    camera.lookAt(rig.x+Math.sin(rig.heading)*Math.cos(rig.pitch),rig.height-Math.sin(rig.pitch),-(rig.z+Math.cos(rig.heading)*Math.cos(rig.pitch)));
    if(player.insideHome){
-    updatePeople([]);homeLamp.intensity=player.homeLights===false?0:34;lampShade.emissiveIntensity=player.homeLights===false?0:.5;
+    updatePeople([]);updatePeople(player.family?.poses||[],homePeople);updateHeldSnack(player,rig,time,true);updateRestBody(player);bedroomLight.intensity=player.homeLights===false?0:25;homeLamp.intensity=player.homeLights===false?0:34;lampShade.emissiveIntensity=player.homeLights===false?0:.5;
     homeAmbient.intensity=player.homeLights===false?.48:1.25;
     tvPicture.visible=!!player.homeTV;
     homeTVMaterial.color.set(player.homeTV?'#85b8ca':'#101a21');homeTVMaterial.emissiveIntensity=player.homeTV?.85:0;tvGlow.intensity=player.homeTV?3:0;
@@ -470,7 +508,7 @@ export function createRenderer(overlay) {
    sky.position.set(rig.x,rig.height,rig.z);
    const targetX=Math.round(player.x/4)*4,targetZ=Math.round(player.z/4)*4;
    sun.position.set(targetX+100,player.groundY+160,targetZ+60);sun.target.position.set(targetX,player.groundY,targetZ);
-   updatePeople(player.insideHome?[]:(state.pedestrians||[]));
+   homePeople.count=0;updateHeldSnack(player,rig,time,false);updatePeople([...(state.pedestrians||[]),...(player.family?.poses||[])]);
    upload(faces);carIndex=0;
    for(const q of queue){
     let car=cars[carIndex];if(!car||car.kind!==q.kind){if(car){scene.remove(car.root);for(const m of [car.paint,car.front,car.rear,car.left,car.right])m.dispose()}cars[carIndex]=car=newVehicle(q.kind,q.col)}carIndex++;
@@ -484,7 +522,7 @@ export function createRenderer(overlay) {
    instanceCars(carIndex);
    cockpit.visible=!player.onFoot&&!player.thirdPerson&&player.gear>0&&player.vehicleType!=='motorcycle';cockpit.position.set(player.x+Math.sin(player.yaw)*.3,player.groundY+(player.eye??1.45)-1.45,player.z+Math.cos(player.yaw)*.3);cockpit.rotation.y=player.yaw;steeringWheel.rotation.z=-player.steering*.9;
    bikeCockpit.visible=!player.onFoot&&!player.thirdPerson&&player.gear>0&&player.vehicleType==='motorcycle';bikeCockpit.position.set(player.x,player.groundY+(player.eye??1.5)-1.45,player.z);bikeCockpit.rotation.y=player.yaw+player.steering*.12;
-   const hud=Math.round(Math.abs(player.speed)*2.237)+'   '+(player.park?'P':player.gear<0?'R':'D')+'   '+(player.signal<0?'◀':player.signal>0?'▶':'');
+   const hud=Math.round(Math.abs(player.speed)*2.237)+'   '+(player.park?'P':player.gear<0?'R':'D')+'   '+(player.signal<0?'?':player.signal>0?'?':'');
    if(hud!==lastHud){screenCtx.fillStyle='#07131b';screenCtx.fillRect(0,0,512,128);screenCtx.textAlign='left';screenCtx.fillStyle='#d8f3eb';screenCtx.font='bold 68px sans-serif';screenCtx.fillText(String(Math.round(Math.abs(player.speed)*2.237)),24,80);screenCtx.font='20px sans-serif';screenCtx.fillText('MPH',28,111);screenCtx.fillStyle='#b8ef9a';screenCtx.font='bold 52px sans-serif';screenCtx.fillText(player.park?'P':player.gear<0?'R':'D',330,76);screenCtx.font='16px sans-serif';screenCtx.fillText(player.park?'PARK':player.gear<0?'REVERSE':'DRIVE',310,109);screenTexture.needsUpdate=true;lastHud=hud}
    mirror.visible=quality!=='low';if(cockpit.visible&&mirror.visible&&mirrorFrame++%(quality==='high'?2:4)===0){
     mirrorCamera.position.set(player.x,player.groundY+1.65,-player.z);
@@ -497,4 +535,3 @@ export function createRenderer(overlay) {
   renderer,scene,camera,homeScene
  };
 }
-

@@ -46,8 +46,8 @@ onFoot=true;const h=homes[19];x=h.x-4;z=h.z+h.front*8.4;interactHome();if(!insid
 x=0;z=3.5;interactHome();if(!homeTV)throw Error('TV');
 x=-3.8;z=-3.7;interactHome();if(homeLights)throw Error('Lights');
 x=0;z=.4;interactHome();if(!homeSeated)throw Error('Sit');interactHome();if(homeSeated)throw Error('Stand');
-x=-2.1;z=2.3;energy=5;interactHome();if(energy!==100)throw Error('Rest');
-x=2.8;z=2.5;energy=50;interactHome();if(energy!==70)throw Error('Snack');
+x=-1.7;z=7.6;energy=5;interactHome();if(!homeLying||makeCameraRig().pitch>=0)throw Error('Lie down');updateFamily(12);if(energy!==100)throw Error('Rest');interactHome();if(homeLying||!isWalkable(x,z))throw Error('Get up');
+x=2.8;z=2.5;energy=50;interactHome();if(!heldSnack||energy!==50)throw Error('Grab snack');x=0;z=.4;interactHome();if(!homeSeated||!heldSnack)throw Error('Carry snack to couch');eatSnack();t+=1;updateFamily(1);if(heldSnack||energy!==70)throw Error('Eat snack');interactHome();
 x=0;z=-4.1;interactHome();if(insideHome||!nearHomeDoor())throw Error('Leave home');
 const before=pedestrianPoses();if(before.length!==32)throw Error('Missing pedestrians');x=0;z=0;advancePedestrians(.1);const after=pedestrianPoses();if(!after.some((p,i)=>p.x!==before[i].x||p.z!==before[i].z))throw Error('Pedestrians stationary');
 for(let i=0;i<110;i++){advancePedestrians(.5);for(const p of pedestrianPoses())if(!isWalkable(p.x,p.z)||residentialRoad(p.x,p.z))throw Error('Unsafe sidewalk route '+p.id)}
@@ -59,3 +59,27 @@ vm.runInContext(`
 reset();vehicleType='car';onFoot=false;freewayCars.splice(0,freewayCars.length,{theta:0,r:575,dir:1,cruise:20,speed:10,kind:'bus'});x=575;z=25;yaw=0;groundY=HIGHWAY_Y;advanceFreeway(.01);if(!Number.isFinite(freewayCars[0].speed))throw Error('Freeway following invalid');
 `,env);
 console.log('PASS: freeway bus following the player uses valid vehicle-sized clearance.');
+vm.runInContext(`
+reset();traffic.length=0;lotVisitors.length=0;freewayCars.length=0;vehicleType='car';onFoot=true;insideHome=true;x=1.8;z=-2.4;
+if(familyRenderState().poses.length!==2)throw Error('Kids missing at home');
+if(!familyInteract()||familyStage!=='following')throw Error('Kids not following');
+const house=homes[19];homeReturn={x:house.x-4,z:house.z+house.front*8.4,yaw:0};x=0;z=-4.1;interactHome();
+parkedVehicle={x:house.x,z:house.z+house.front*12,yaw:0,type:'motorcycle'};x=parkedVehicle.x+1.5;z=parkedVehicle.z;toggleWalking();if(!onFoot||familyStage!=='following')throw Error('Motorcycle accepted for kids');
+parkedVehicle.type='minivan';toggleWalking();if(onFoot||familyStage!=='riding')throw Error('Family boarding failed');
+if(selectVehicle('motorcycle')!==false)throw Error('Unsafe family vehicle change');
+groundY=0;for(const cx of [196,296])for(let cz=160;cz<212;cz+=2)if(!clearFootprint(cx,cz,0))throw Error('School entrance blocked');
+for(let cx=196;cx<300;cx+=2)if(!clearFootprint(cx,224,Math.PI/2))throw Error('School drop-off lane blocked');
+x=244;z=224;speed=1;park=false;familyInteract();if(familyStage!=='riding')throw Error('Moving drop-off accepted');
+speed=0;park=true;familyInteract();if(familyStage!=='school')throw Error('Drop-off failed');
+updateFamily(30);if(familyStage!=='school')throw Error('Early dismissal');updateFamily(31);if(familyStage!=='ready'||familyRenderState().poses.length!==2)throw Error('Dismissal failed');
+familyInteract();if(familyStage!=='riding'||familyTrip!=='home')throw Error('Pickup failed');
+x=house.x;z=house.z+house.front*12;yaw=0;toggleWalking();if(!onFoot||familyStage!=='following')throw Error('Unload family');
+x=house.x-4;z=house.z+house.front*8.4;interactHome();if(!insideHome||familyStage!=='home'||schoolTrips!==1)throw Error('Homecoming failed');
+// Both rear bedrooms are reachable through clear doorways; furniture and dividers block walking.
+for(const doorX of [-2,2])for(let cz=4;cz<=6;cz+=.1)if(!isWalkable(doorX,cz))throw Error('Bedroom doorway blocked');
+if(isWalkable(0,6)||isWalkable(-3.4,8)||isWalkable(3.4,8.5))throw Error('Bedroom collision missing');
+if(!isWalkable(-1.7,7.6)||!isWalkable(1.5,8)||isWalkable(0,12))throw Error('Expanded house bounds');
+insideHome=false;x=244;z=224;faces=[];drawSchool();if(faces.length<30)throw Error('School missing');
+reset();if(familyStage!=='home'||homeLying||heldSnack)throw Error('Family reset failed');
+`,env);
+console.log('PASS: full family school trip, safe boarding/drop-off, dismissal/pickup/homecoming, school vehicle clearance and expanded bedroom access.');
