@@ -485,7 +485,7 @@ function eatSnack(){if(!onFoot||!heldSnack||t<snackEatingUntil)return;snackEatin
 function updateFamily(dt){if(snackEatingUntil&&t>=snackEatingUntil){snackEatingUntil=0;heldSnack=false;energy=Math.min(100,energy+20)}if(homeLying)energy=Math.min(100,energy+dt*8);if(familyStage==='school'){schoolTimer-=dt;if(schoolTimer<=0){schoolTimer=0;familyStage='ready';say('School is finished! Pick up your kids at SCHOOL.',7)}}}
 function familyStatus(){return familyStage==='home'?'Kids at home � '+schoolTrips+' school trips completed':familyStage==='following'?'Kids following � G to board vehicle':familyStage==='riding'?(familyTrip==='school'?'Kids buckled in � Drive to SCHOOL':'Kids buckled in � Drive HOME'):familyStage==='school'?'Class ends in '+Math.ceil(schoolTimer)+'s':'School is out � Pick up your kids'}
 function familyInteract(){
- if(insideHome&&!homeSeated&&!homeLying&&familyStage==='home'&&Math.hypot(x-1.8,z+2.4)<2){familyStage='following';familyTrip='school';say('Let's go to school! The kids will follow you outside.',5);return true}
+ if(insideHome&&!homeSeated&&!homeLying&&familyStage==='home'&&Math.hypot(x-1.8,z+2.4)<2){familyStage='following';familyTrip='school';say('Time for school! The kids will follow you outside.',5);return true}
  if(!insideHome&&!onFoot&&atSchoolBay()){
   if(Math.abs(speed)>.3||!park){say('Stop in the blue school bay and set P before using F.');return true}
   if(familyStage==='riding'&&familyTrip==='school'){familyStage='school';schoolTimer=60;say('Kids dropped off! Class lasts 60 seconds of play time.',6);return true}
