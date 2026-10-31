@@ -1,4 +1,4 @@
-import {createRenderer} from './renderer.js';
+import {createRenderer} from './renderer.js?v=20261030-startup';
 const vehicleSpecs={
  car:{name:'Car',color:'#97c9c0',width:1.88,length:4.36,eye:1.45,wheelbase:3.2,accel:3.5},
  motorcycle:{name:'Motorcycle',color:'#c84d38',width:.82,length:2.3,eye:1.5,wheelbase:1.65,accel:4.5},

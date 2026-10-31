@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import * as THREE from './vendor/three.module.js';
 
 // Ultra owns presentation only. Road geometry and gameplay stay in game.js.
 export function createRenderer(overlay) {
