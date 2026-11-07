@@ -33,7 +33,10 @@ export function createRenderer(overlay) {
  }
  const asphalt=surfaceTexture('asphalt'),concrete=surfaceTexture('concrete'),grass=surfaceTexture('grass'),brick=surfaceTexture('brick');
  const materials=[
-  new THREE.MeshStandardMaterial({vertexColors:true,map:asphalt,bumpMap:asphalt,bumpScale:.018,roughness:.94}),
+  // Keep asphalt just in front of the grass ground in the depth buffer. The
+  // ground spans the full world, so precision can otherwise let its texture
+  // show through road surfaces at long viewing distances.
+  new THREE.MeshStandardMaterial({vertexColors:true,map:asphalt,bumpMap:asphalt,bumpScale:.018,roughness:.94,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
   new THREE.MeshStandardMaterial({vertexColors:true,map:grass,roughness:1}),
   new THREE.MeshStandardMaterial({vertexColors:true,map:concrete,bumpMap:concrete,bumpScale:.012,roughness:.87}),
   new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.13,metalness:.15,clearcoat:1,envMapIntensity:1.1}),
