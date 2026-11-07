@@ -7,7 +7,8 @@ export function createRenderer(overlay) {
  overlay.before(renderer.domElement);overlay.style.position='absolute';overlay.style.inset='0';overlay.style.zIndex='1';
  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- const scene=new THREE.Scene();scene.scale.z=-1; // Convert the game's +Z-forward coordinates to Three.js.scene.background=new THREE.Color('#abc9dc');scene.fog=new THREE.FogExp2('#abc9dc',.0015);
+ const scene=new THREE.Scene();scene.scale.z=-1; // Convert the game's +Z-forward coordinates to Three.js.
+ scene.background=new THREE.Color('#abc9dc');scene.fog=new THREE.FogExp2('#abc9dc',.0015);
  const camera=new THREE.PerspectiveCamera(70,1,.15,2400);
  const hemi=new THREE.HemisphereLight('#cee7ff','#68734d',2.15);scene.add(hemi);
  const sun=new THREE.DirectionalLight('#fff1db',3.1);sun.castShadow=true;
@@ -315,6 +316,72 @@ export function createRenderer(overlay) {
   through.position.set(3,6.5,-.18);through.rotation.y=Math.PI;gantry.add(through);
  }
 
+ // Original, locally generated detail for the Sunset Park visual benchmark.
+function addMilestoneDetail() {
+ const district=new THREE.Group();district.name='sunset-benchmark';scene.add(district);
+ const ivory=new THREE.MeshStandardMaterial({color:'#eee8d8',roughness:.78});
+ const cedar=new THREE.MeshStandardMaterial({color:'#8c6346',roughness:.85});
+ const leaf=new THREE.MeshStandardMaterial({color:'#52724c',roughness:1});
+ const stone=new THREE.MeshStandardMaterial({color:'#b4ada0',roughness:.92});
+ const teal=new THREE.MeshStandardMaterial({color:'#246f80',roughness:.72});
+ const foliageGeo=new THREE.IcosahedronGeometry(1,1);
+ function detail(parent,mat,name,x,y,z,w,h,d){const m=block(parent,mat,x,y,z,w,h,d);m.name=name;return m}
+ // The western row of Sunset Park: HOME is its northernmost house (180,-180).
+ for(let k=0;k<4;k++){
+  const x=180,z=-300+k*40,front=k===0?-1:k===1?1:k===2?-1:1;
+  const height=(16+k)%3===0?6.2:3.7;
+  const house=new THREE.Group();house.name='benchmark-house-'+k;house.position.set(x,0,z);district.add(house);
+  for(const side of [-1,1]){
+   detail(house,ivory,'corner-trim',side*7.03,height/2,front*7.05,.16,height,.16);
+   detail(house,ivory,'eave-fascia',0,height+.04,side*7.72,15.5,.24,.16);
+   detail(house,stone,'foundation',0,.23,side*7.04,14.1,.46,.1);
+   // All shrubs remain within the already solid house footprint.
+   for(let j=0;j<5;j++){const m=new THREE.Mesh(foliageGeo,leaf);m.position.set(-6+j*3,.65,side*6.75);m.scale.set(.7,.6,.5);m.castShadow=true;house.add(m)}
+  }
+  // Window on the front wall beside the garage, with a deep sill and slatted shutters.
+  detail(house,ivory,'window-surround',4,1.9,front*7.1,2.65,1.8,.16);
+  detail(house,glassMaterial,'front-window',4,1.9,front*7.21,2.3,1.5,.06);
+  detail(house,ivory,'window-mullion',4,1.9,front*7.27,.06,1.5,.06);
+  detail(house,ivory,'window-sill',4,1.08,front*7.29,2.8,.1,.35);
+  for(const side of [-1,1])for(let j=0;j<7;j++)detail(house,k===3?teal:cedar,'shutter-slat',4+side*1.65,1.25+j*.21,front*7.2,.5,.14,.08);
+  for(let y=.55;y<height;y+=.32)detail(house,k===3?teal:ivory,'siding-course',0,y,front*7.025,14,.018,.025);
+  for(const side of [-1,1])detail(house,ivory,'porch-capital',-4+side*1.1,2.45,front*8.7,.27,.25,.27);
+  // Porch light stays against the wall, off the entrance walkway.
+  detail(house,trim,'porch-lantern',-5.2,2.1,front*7.2,.25,.4,.2);
+  detail(house,new THREE.MeshStandardMaterial({color:'#ffe5b5',emissive:'#ffd19a',emissiveIntensity:.5}),'lantern-glass',-5.2,2.1,front*7.32,.17,.28,.08);
+  // Flat driveway joints: no new obstacle or change in drivable width.
+  for(let q=10;q<20;q+=3)detail(house,stone,'driveway-joint',0,.083,front*q,5.95,.008,.025);
+ }
+ // HOME porch finish and address plaque; keep the walking path centered at x=176 open.
+ detail(district,cedar,'home-door-inlay',176,1.15,-172.79,.82,1.8,.03);
+ const plaque=new THREE.Mesh(new THREE.PlaneGeometry(1.2,.35),signTexture('180','SUNSET PARK','#246f80'));
+ plaque.name='home-address';plaque.position.set(174.4,1.65,-172.72);district.add(plaque);
+ const uv=plaque.geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setX(i,1-uv.getX(i));
+ // Interior details stay inside furniture collision footprints or on walls.
+ for(const x of [-1.18,-.4,.4,1.18])homeBox('sofa-piping',x,.775,1.38,.018,.018,.7,homeMat.linen,.006);
+ for(const x of [-.87,0,.87])for(const y of [.91,1.11])homeBox('sofa-button',x,y,.878,.035,.035,.018,homeMat.linen,.008);
+ for(let j=0;j<6;j++)homeBox('folded-blanket',.75+j*.065,.79,1.5,.055,.035,.7,homeMat.blue,.012);
+ for(const x of [-4.3,-3.4,-2.5])homeBox('headboard-channel',x,.97,9.52,.025,.84,.03,homeMat.linen,.008);
+ for(let j=0;j<5;j++){const book=homeBox('console-book',-.95+j*.15,.84,4.4,.12,.23+j%2*.06,.26,j%2?homeMat.blue:homeMat.linen,.008);book.rotation.z=(j-2)*.04}
+ homeBox('wall-art-frame',-2.4,1.9,-4.86,1.45,1.05,.06,homeMat.walnut,.02);
+ homeBox('wall-art-mat',-2.4,1.9,-4.81,1.29,.89,.02,homeMat.linen);
+ homeBox('wall-art-sea',-2.4,1.75,-4.79,1.12,.42,.01,homeMat.blue);
+ homeBox('wall-art-sky',-2.4,2.06,-4.79,1.12,.2,.01,homeMat.trim);
+ // Batch the repeated trim, shutters and foliage; do not add a draw call per slat.
+ district.updateMatrixWorld(true);
+ const inverse=new THREE.Matrix4().copy(district.matrixWorld).invert(),matrix=new THREE.Matrix4(),groups=new Map();
+ district.traverse(m=>{if(!m.isMesh)return;const key=m.geometry.uuid+':'+m.material.uuid;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m)});
+ for(const parts of groups.values()){
+  if(parts.length<2)continue;
+  const batch=new THREE.InstancedMesh(parts[0].geometry,parts[0].material,parts.length);batch.name='benchmark-batch';batch.castShadow=true;batch.receiveShadow=true;
+  parts.forEach((m,i)=>{matrix.multiplyMatrices(inverse,m.matrixWorld);batch.setMatrixAt(i,matrix);m.parent.remove(m)});
+  batch.instanceMatrix.needsUpdate=true;batch.computeBoundingSphere();district.add(batch);
+ }
+ // Distance culling avoids paying for the sample block across the city.
+ return (x,z)=>{district.visible=Math.hypot(x-180,z+240)<230};
+}
+const updateMilestoneDetail=addMilestoneDetail();
+
  const cars=[],queue=[];let carIndex=0;
  function newCar(col){
   const root=new THREE.Group(),paint=new THREE.MeshPhysicalMaterial({color:col,metalness:.45,roughness:.29,clearcoat:1,clearcoatRoughness:.15});scene.add(root);
@@ -347,8 +414,26 @@ export function createRenderer(overlay) {
  
  
  const roundGeo=new THREE.SphereGeometry(1,16,10);
+ const spokeGeo=new THREE.BoxGeometry(.032,.33,.032);
+ function detailCar(v){
+  const r=v.root;
+  for(const side of [-1,1]){
+   block(r,chrome,side*.89,.99,-.15,.025,.025,2.25);
+   block(r,trim,side*.897,.68,-.18,.012,.50,.018);
+   block(r,trim,side*.897,.67,.91,.012,.48,.018);
+   block(r,trim,side*.57,1.035,1.42,.012,.012,.8);
+   block(r,glassMaterial,side*1.055,1.15,.65,.012,.10,.22);
+   for(const z of [-1.88,1.88])block(r,chrome,side*.59,.43,z,.36,.045,.08);
+  }
+  for(let j=0;j<5;j++)block(r,chrome,0,.49+j*.026,2.17,.73,.009,.025);
+  block(r,plateMaterial,0,.36,2.16,.43,.12,.025);
+  for(const wheel of v.wheels){for(let j=0;j<5;j++){
+   const spoke=new THREE.Mesh(spokeGeo,chrome);spoke.rotation.x=j*Math.PI/5;spoke.position.x=Math.sign(wheel.position.x)*.14;wheel.add(spoke);
+  }}
+  return v;
+ }
  function newVehicle(kind,col){
-  const v=newCar(col);v.kind=kind;if(kind==='car')return v;
+  const v=newCar(col);v.kind=kind;if(kind==='car')return detailCar(v);
   v.root.clear();v.wheels.length=0;
   const root=v.root,paint=v.paint;
   function panel(mat,x,y,z,w,h,d){return block(root,mat,x,y,z,w,h,d)}
@@ -509,7 +594,7 @@ export function createRenderer(overlay) {
    const targetX=Math.round(player.x/4)*4,targetZ=Math.round(player.z/4)*4;
    sun.position.set(targetX+100,player.groundY+160,targetZ+60);sun.target.position.set(targetX,player.groundY,targetZ);
    homePeople.count=0;updateHeldSnack(player,rig,time,false);updatePeople([...(state.pedestrians||[]),...(player.family?.poses||[])]);
-   upload(faces);carIndex=0;
+   updateMilestoneDetail(player.x,player.z);upload(faces);carIndex=0;
    for(const q of queue){
     let car=cars[carIndex];if(!car||car.kind!==q.kind){if(car){scene.remove(car.root);for(const m of [car.paint,car.front,car.rear,car.left,car.right])m.dispose()}cars[carIndex]=car=newVehicle(q.kind,q.col)}carIndex++;
     car.root.visible=true;car.root.position.set(q.a,q.elevation,q.b);car.root.rotation.y=q.r;car.paint.color.set(q.col);
