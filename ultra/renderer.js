@@ -43,7 +43,8 @@ export function createRenderer(overlay) {
   new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75}),
   new THREE.MeshStandardMaterial({vertexColors:true,map:brick,bumpMap:brick,bumpScale:.035,roughness:.88}),
   new THREE.MeshPhysicalMaterial({vertexColors:true,metalness:.45,roughness:.27,clearcoat:1}),
-  new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1})
+  // Keep road paint in front of the biased asphalt at shallow viewing angles.
+  new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4})
  ];
  materials.forEach(m=>{m.side=THREE.DoubleSide});
  const batches=materials.map(material=>{const mesh=new THREE.Mesh(new THREE.BufferGeometry(),material);mesh.frustumCulled=false;mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return {mesh,capacity:0,faces:[]}});
