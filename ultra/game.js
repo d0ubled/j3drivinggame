@@ -495,9 +495,9 @@ function drawResidentialSidewalks(){
     if(![-1,0,1].some(d=>residentialDrive(n.x+q+d,n.z+off)))cube(n.x+q,n.z+off,1.96,.18,.13,'#b9b8aa',0,.035);
    }
   }
-  for(const side of [-1,1])for(let q=-5.4;q<6;q+=1.8){
-   rect(n.x+q,n.x+q+.9,n.z+side*11-1,n.z+side*11+1,'#eee9d8',.08);
-   rect(n.x+side*11-1,n.x+side*11+1,n.z+q,n.z+q+.9,'#eee9d8',.08);
+  for(const side of [-1,1])for(let q=-5.95;q<5.9;q+=1.8){
+   rect(n.x+q,n.x+q+1.1,n.z+side*11-1.4,n.z+side*11+1.4,'#f4f0df',.08);
+   rect(n.x+side*11-1.4,n.x+side*11+1.4,n.z+q,n.z+q+1.1,'#f4f0df',.08);
   }
  }
  // Every front porch connects to its nearest sidewalk, including the player's home.

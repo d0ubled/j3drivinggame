@@ -6,7 +6,7 @@ const startButton=document.getElementById('start');
 startButton.disabled=true;
 document.getElementById('ultra-retry').onclick=()=>location.reload();
 try{
- await import('./ultra/game.js?v=20261109-road-paint');
+ await import('./ultra/game.js?v=20261109-road-paint-2');
  startButton.disabled=false;
  document.getElementById('ultra-error').hidden=true;
 }catch(error){
